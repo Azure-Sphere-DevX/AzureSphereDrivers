@@ -1,80 +1,114 @@
 #include "as1115.h"
 
-void as1115_write(matrix8x8_t* panel8x8, unsigned char reg_number, unsigned char dataout)
-{
-	if (panel8x8->handle == -1) {
+
+bool as1115_read_key(as1115_t* retro_click) {
+	uint8_t buf[2];
+	if (retro_click->handle == -1) {
+		return 0;
+	}
+
+	static const uint8_t register_address = KEYA_r;
+	unsigned char temp;
+
+	if (I2CMaster_WriteThenRead(retro_click->handle, AS1115_I2C_ADDRESS, &register_address, sizeof(register_address), (uint8_t*)buf, sizeof(buf)) != 3) {
+		Log_Debug("AS1115 Key read failed\n");
+		return false;
+	}
+
+	// rotate result left by 1 bit
+	temp = buf[0];
+	buf[0] = (uint8_t)~(buf[0] << 1 | (uint8_t)(temp >> 7));
+	
+
+	// rotate result left by 1 bit
+	temp = buf[1];
+	buf[1] = (uint8_t)~(buf[1] << 1 | (uint8_t)(temp >> 7));
+
+	retro_click->keypad = (uint16_t)(buf[0] << 8 | (uint16_t)buf[1]);
+
+	return true;
+}
+
+
+void as1115_write(as1115_t* retro_click, unsigned char reg_number, unsigned char dataout) {
+	if (retro_click->handle == -1) {
 		return;
 	}
 
 	unsigned char data[2];
-	SPIMaster_Transfer transfer;
-
 	data[0] = reg_number;
 	data[1] = dataout;
 
-	SPIMaster_InitTransfers(&transfer, 1);
-	transfer.flags = SPI_TransferFlags_Write;
-	transfer.length = 2;
-	transfer.writeData = data;
-
-	if (SPIMaster_TransferSequential(panel8x8->handle, &transfer, 1) != 2) {
-		Log_Debug("SPI Write Failed");
+	if (I2CMaster_Write(retro_click->handle, AS1115_I2C_ADDRESS, data, sizeof(data)) != 2) {
+		Log_Debug("I2C Write Failed\n");
 	}
 }
 
-void as1115_set_brightness(matrix8x8_t* panel8x8, unsigned char brightness)
-{
+void as1115_set_brightness(as1115_t* retro_click, unsigned char brightness) {
 	brightness &= 0x0f;                                 // mask off extra bits
-	as1115_write(panel8x8, MAX7219_REG_INTENSITY, brightness);           // set brightness
+	as1115_write(retro_click, AS1115_REG_INTENSITY, brightness);
 }
 
 
-void as1115_display_test(matrix8x8_t* panel8x8, bool state)
-{
-	as1115_write(panel8x8, MAX7219_REG_DISPLAY_TEST, state ? 1 : 0);                 // put MAX7219 into "display test" mode
+void as1115_display_test(as1115_t* retro_click, bool state) {
+	// put AS1115 into "display test" mode
+	as1115_write(retro_click, AS1115_REG_DISPLAY_TEST, state ? 1 : 0);
 }
 
 
-void as1115_clear(matrix8x8_t* panel8x8)
-{
+void as1115_clear(as1115_t* retro_click) {
 	char i;
 	for (i = 1; i < 9; i++)
-		as1115_write(panel8x8, i, 0x00);                           // turn all segments off
+		// turn all segments off
+		as1115_write(retro_click, i, 0x00);
 }
 
-void as1115_panel_write(matrix8x8_t* panel8x8)
-{
-	for (unsigned char i = 0; i < sizeof(panel8x8->bitmap); i++) {
-		as1115_write(panel8x8, (unsigned char)(i + 1), panel8x8->bitmap[i]);
+void as1115_panel_write(as1115_t* retro_click) {
+	for (unsigned char i = 0; i < sizeof(retro_click->bitmap); i++) {
+
+		// Work around for hardware issue - column addressing is good
+		// Row address needs to be rotated as 
+		// bit 1 was displayed at led 2
+		// bit 0 was displayed at led 8.
+		unsigned char temp = retro_click->bitmap[i];
+		retro_click->bitmap[i] = temp >> 1;
+		retro_click->bitmap[i] = retro_click->bitmap[i] | (unsigned char)(temp << 7);
+
+		as1115_write(retro_click, (unsigned char)(i + 1), retro_click->bitmap[i]);
 	}
 }
 
-void as1115_panel_clear(matrix8x8_t* panel8x8)
-{
-	for (size_t i = 0; i < sizeof(panel8x8->bitmap); i++) {
-		panel8x8->bitmap[i] = 0;
+void as1115_panel_clear(as1115_t* retro_click) {
+	for (size_t i = 0; i < sizeof(retro_click->bitmap); i++) {
+		retro_click->bitmap[i] = 0;
 	}
 
-	as1115_panel_write(panel8x8);
+	as1115_panel_write(retro_click);
 }
 
-void as1115_init(matrix8x8_t* panel8x8, unsigned char intialBrightness)
-{
-	SPIMaster_Config max7219Config;
 
-	SPIMaster_InitConfig(&max7219Config);
-	max7219Config.csPolarity = SPI_ChipSelectPolarity_ActiveLow;
+bool as1115_init(as1115_t* retro_click, unsigned char intialBrightness) {
+	retro_click->handle = I2CMaster_Open(retro_click->interfaceId);
+	if (retro_click->handle == -1) {
+		Log_Debug("ERROR: I2CMaster_Open: errno=%d (%s)\n", errno, strerror(errno));
+		return false;
+	}
 
-	panel8x8->handle = SPIMaster_Open(panel8x8->interfaceId, panel8x8->chipSelectId, &max7219Config);
+	int result = I2CMaster_SetBusSpeed(retro_click->handle, I2C_BUS_SPEED_FAST_PLUS);
+	if (result != 0) {
+		Log_Debug("ERROR: I2CMaster_SetBusSpeed: errno=%d (%s)\n", errno, strerror(errno));
+		return false;
+	}
 
-	SPIMaster_SetBusSpeed(panel8x8->handle, panel8x8->busSpeed);
-	SPIMaster_SetBitOrder(panel8x8->handle, SPI_BitOrder_MsbFirst);
-	SPIMaster_SetMode(panel8x8->handle, SPI_Mode_0);
+	result = I2CMaster_SetTimeout(retro_click->handle, 100);
+	if (result != 0) {
+		Log_Debug("ERROR: I2CMaster_SetTimeout: errno=%d (%s)\n", errno, strerror(errno));
+		return false;
+	}
 
-	as1115_set_brightness(panel8x8, intialBrightness);							// set to maximum intensity
-	as1115_display_test(panel8x8, false);							// disable test mode
+	as1115_write(retro_click, AS1115_REG_SCAN_LIMIT, 7);                   // set up to scan all eight digits
+	as1115_write(retro_click, AS1115_REG_DECODE, 0x00);                    // set to "no decode" for all digits
+	as1115_write(retro_click, AS1115_REG_SHUTDOWN, 1);                     // put AS1115 into "normal" mode
 
-	as1115_write(panel8x8, MAX7219_REG_SCAN_LIMIT, 7);                   // set up to scan all eight digits
-	as1115_write(panel8x8, MAX7219_REG_DECODE, 0x00);                    // set to "no decode" for all digits
-	as1115_write(panel8x8, MAX7219_REG_SHUTDOWN, 1);                     // put MAX7219 into "normal" mode
+	return true;
 }

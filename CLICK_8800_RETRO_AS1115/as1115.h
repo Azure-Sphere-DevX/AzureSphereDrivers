@@ -1,34 +1,37 @@
 #pragma once
 
+#define I2C_STRUCTS_VERSION 1
+
 #include <applibs/log.h>
-#include <applibs/spi.h>
+#include <applibs/i2c.h>
 #include <stdbool.h>
+#include <errno.h>
+#include <string.h>
 
-#define MAX7219_REG_DECODE        0x09                        // "decode mode" register
-#define MAX7219_REG_INTENSITY     0x0a                        // "intensity" register
-#define MAX7219_REG_SCAN_LIMIT    0x0b                        // "scan limit" register
-#define MAX7219_REG_SHUTDOWN      0x0c                        // "shutdown" register
-#define MAX7219_REG_DISPLAY_TEST  0x0f                        // "display test" register
+#define AS1115_REG_DECODE        0x09                        // "decode mode" register
+#define AS1115_REG_INTENSITY     0x0a                        // "intensity" register
+#define AS1115_REG_SCAN_LIMIT    0x0b                        // "scan limit" register
+#define AS1115_REG_SHUTDOWN      0x0c                        // "shutdown" register
+#define AS1115_REG_DISPLAY_TEST  0x0f                        // "display test" register
+#define KEYA_r 0x1C
 
-#define MAX7219_INTENSITY_MIN     0x00                        // minimum display intensity
-#define MAX7219_INTENSITY_MAX     0x0f                        // maximum display intensity
+#define AS1115_I2C_ADDRESS		0x00
 
 typedef struct {
-	SPI_InterfaceId interfaceId;
-	SPI_ChipSelectId chipSelectId;
-	uint32_t busSpeed;
+	I2C_InterfaceId interfaceId;
 	int handle;
 	union {
 		unsigned char bitmap[8];
 		uint64_t bitmap64;
 	};
-	
-} matrix8x8_t;
+	uint16_t keypad;	
+} as1115_t;
 
-void as1115_clear(matrix8x8_t* panel8x8);
-void as1115_display_test(matrix8x8_t* panel8x8, bool state);
-void as1115_init(matrix8x8_t* panel8x8, unsigned char intialBrightness);
-void as1115_panel_clear(matrix8x8_t* panel8x8);
-void as1115_panel_write(matrix8x8_t* panel8x8);
-void as1115_set_brightness(matrix8x8_t* panel8x8, unsigned char brightness);
-void as1115_write(matrix8x8_t* panel8x8, unsigned char reg_number, unsigned char dataout);
+void as1115_clear(as1115_t* retro_click);
+void as1115_display_test(as1115_t* retro_click, bool state);
+bool as1115_init(as1115_t* retro_click, unsigned char intialBrightness);
+void as1115_panel_clear(as1115_t* retro_click);
+void as1115_panel_write(as1115_t* retro_click);
+void as1115_set_brightness(as1115_t* retro_click, unsigned char brightness);
+void as1115_write(as1115_t* retro_click, unsigned char reg_number, unsigned char dataout);
+bool as1115_read_key(as1115_t* retro_click);

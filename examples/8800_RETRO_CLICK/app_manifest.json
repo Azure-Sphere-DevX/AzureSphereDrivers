@@ -5,7 +5,7 @@
   "EntryPoint": "/bin/app",
   "CmdArgs": [],
   "Capabilities": {
-    "SpiMaster": [ "$MT3620_ISU1_SPI" ]
+    "I2cMaster": [ "$ISU2" ]
   },
   "ApplicationType": "Default"
 }
