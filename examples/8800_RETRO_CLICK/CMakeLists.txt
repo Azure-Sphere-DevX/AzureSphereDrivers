@@ -10,10 +10,10 @@ azsphere_configure_api(TARGET_API_SET "9")
 
 # Create executable
 add_executable (${PROJECT_NAME} main.c)
-target_link_libraries (${PROJECT_NAME} applibs pthread gcc_s c)
+target_link_libraries (${PROJECT_NAME} applibs gcc_s c)
 
-add_subdirectory("../../CLICK_8800_RETRO_AS1115" max7219_driver)
-include_directories(${CMAKE_SOURCE_DIR} ../../CLICK_8800_RETRO_AS1115)
+add_subdirectory("../../CLICK_8800_RETRO_AS1115" as1115_driver)
+include_directories(${PROJECT_NAME} ../../CLICK_8800_RETRO_AS1115)
 target_link_libraries(${PROJECT_NAME} as1115_driver)
 target_include_directories(${PROJECT_NAME} PUBLIC ../../CLICK_8800_RETRO_AS1115 )
 
