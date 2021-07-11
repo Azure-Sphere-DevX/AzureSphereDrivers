@@ -30,27 +30,26 @@ static bool c4x4key_get_data(as1115_t* retro_click) {
 	temp = buf[1];
 	buf[1] = (uint8_t)(buf[1] << 1 | (uint8_t)(temp >> 7));
 
-	retro_click->keymap = (uint16_t)(buf[0] << 8 | (uint16_t)buf[1]);
+	retro_click->keymap = (uint16_t)~(buf[0] << 8 | (uint16_t)buf[1]);
 
 	return true;
 }
 
 uint8_t as1115_get_btn_position(as1115_t* retro_click) {
-	uint16_t result;
 	uint8_t position;
 
 	position = 0;
 
 	if (c4x4key_get_data(retro_click)) {
-		result = (uint16_t)(UINT16_MAX - retro_click->keymap);
 
-		while (result) {
+		while (retro_click->keymap) {
 			position++;
-			result >>= 1;
+			retro_click->keymap >>= 1;
 		}
 
+		// reverse the button numbers so the top left is button 1, bottom right is 16
 		if (position > 0) {
-			position = 17 - position;
+			position = (uint8_t)(17 - position);
 		}
 
 		int64_t now_milliseconds = get_now_milliseconds();
@@ -148,6 +147,8 @@ bool as1115_init(as1115_t* retro_click, unsigned char intialBrightness) {
 	as1115_write(retro_click, AS1115_REG_SCAN_LIMIT, 7);                   // set up to scan all eight digits
 	as1115_write(retro_click, AS1115_REG_DECODE, 0x00);                    // set to "no decode" for all digits
 	as1115_write(retro_click, AS1115_REG_SHUTDOWN, 1);                     // put AS1115 into "normal" mode
+
+	as1115_set_brightness(retro_click, intialBrightness);
 
 	return true;
 }
