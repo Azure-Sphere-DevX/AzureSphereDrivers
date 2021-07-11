@@ -33,7 +33,7 @@ static bool c4x4key_get_data(key4x4_t* key4x4)
 	return true;
 }
 
-uint8_t c4x4key_get_btn_position(key4x4_t* key4x4)
+uint8_t as1115_get_btn_position(key4x4_t* key4x4)
 {
 	uint16_t result;
 	uint8_t position;

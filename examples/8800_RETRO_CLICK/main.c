@@ -8,7 +8,7 @@
 
 #include "hw/azure_sphere_learning_path.h"
 
-as1115_t retro_click = { .interfaceId = ISU2, .handle = -1, .bitmap = {0} };
+as1115_t retro_click = { .interfaceId = ISU2, .handle = -1, .bitmap = {0}, .keymap = 0, .debouncePeriodMilliseconds = 500 };
 static char letters[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
 
 
@@ -20,6 +20,7 @@ void init_altair_hardware(void) {
 
 int main(void) {
 	unsigned int letter = 0;
+	uint8_t button_position = 0;
 
 	init_altair_hardware();
 
@@ -36,8 +37,8 @@ int main(void) {
 
 		as1115_panel_write(&retro_click);
 
-		if (as1115_read_key(&retro_click)) {
-			Log_Debug("Bitmap: %d\n", retro_click.keypad);
+		if ((button_position = as1115_get_btn_position(&retro_click)) != 0) {
+			Log_Debug("Button %d pressed\n", button_position);
 		}
 
 		nanosleep(&(struct timespec) { 0, 150000000 }, NULL);

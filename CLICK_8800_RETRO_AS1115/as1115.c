@@ -1,7 +1,13 @@
 #include "as1115.h"
 
+static int64_t get_now_milliseconds(void) {
+	struct timespec now = { 0,0 };
+	clock_gettime(CLOCK_MONOTONIC, &now);
+	return now.tv_sec * 1000 + now.tv_nsec / 1000000;
+}
 
-bool as1115_read_key(as1115_t* retro_click) {
+
+static bool c4x4key_get_data(as1115_t* retro_click) {
 	uint8_t buf[2];
 	if (retro_click->handle == -1) {
 		return 0;
@@ -17,16 +23,45 @@ bool as1115_read_key(as1115_t* retro_click) {
 
 	// rotate result left by 1 bit
 	temp = buf[0];
-	buf[0] = (uint8_t)~(buf[0] << 1 | (uint8_t)(temp >> 7));
+	buf[0] = (uint8_t)(buf[0] << 1 | (uint8_t)(temp >> 7));
 	
 
 	// rotate result left by 1 bit
 	temp = buf[1];
-	buf[1] = (uint8_t)~(buf[1] << 1 | (uint8_t)(temp >> 7));
+	buf[1] = (uint8_t)(buf[1] << 1 | (uint8_t)(temp >> 7));
 
-	retro_click->keypad = (uint16_t)(buf[0] << 8 | (uint16_t)buf[1]);
+	retro_click->keymap = (uint16_t)(buf[0] << 8 | (uint16_t)buf[1]);
 
 	return true;
+}
+
+uint8_t as1115_get_btn_position(as1115_t* retro_click) {
+	uint16_t result;
+	uint8_t position;
+
+	position = 0;
+
+	if (c4x4key_get_data(retro_click)) {
+		result = (uint16_t)(UINT16_MAX - retro_click->keymap);
+
+		while (result) {
+			position++;
+			result >>= 1;
+		}
+
+		int64_t now_milliseconds = get_now_milliseconds();
+
+		if (position == 0 || (position == retro_click->lastButtonPressed && (now_milliseconds - retro_click->lastButtonPressMilliseconds) < retro_click->debouncePeriodMilliseconds)) {
+			return 0;
+		}
+
+		retro_click->lastButtonPressMilliseconds = now_milliseconds;
+		retro_click->lastButtonPressed = position;
+
+		return position;
+	} else {
+		return 0;
+	}
 }
 
 
