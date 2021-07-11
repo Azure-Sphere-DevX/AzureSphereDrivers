@@ -49,6 +49,10 @@ uint8_t as1115_get_btn_position(as1115_t* retro_click) {
 			result >>= 1;
 		}
 
+		if (position > 0) {
+			position = 17 - position;
+		}
+
 		int64_t now_milliseconds = get_now_milliseconds();
 
 		if (position == 0 || (position == retro_click->lastButtonPressed && (now_milliseconds - retro_click->lastButtonPressMilliseconds) < retro_click->debouncePeriodMilliseconds)) {
