@@ -106,8 +106,8 @@ void as1115_panel_write(as1115_t* retro_click) {
 
 		// Work around for hardware issue - column addressing is good
 		// Row address needs to be rotated as 
-		// bit 1 was displayed at led 2
-		// bit 0 was displayed at led 8.
+		// bit 2 was displayed at led 1
+		// bit 1 was displayed at led 8.
 		unsigned char temp = retro_click->bitmap[i];
 		retro_click->bitmap[i] = temp >> 1;
 		retro_click->bitmap[i] = retro_click->bitmap[i] | (unsigned char)(temp << 7);
