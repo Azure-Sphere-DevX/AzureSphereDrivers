@@ -13,9 +13,7 @@ static char letters[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
 
 
 void init_altair_hardware(void) {
-	as1115_init(&retro_click, 2);
-
-	//as1115_set_brightness(&retro_click, 2);
+	as1115_init(&retro_click, 1);
 }
 
 int main(void) {
