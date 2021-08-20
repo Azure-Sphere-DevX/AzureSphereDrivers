@@ -28,11 +28,11 @@ typedef struct
 	float z;
 } AccelerationMilligForce;
 
-void lp_imu_initialize(void);
-void lp_imu_close(void);
-float lp_get_temperature(void);
-float lp_get_pressure(void);
-float lp_get_temperature_lps22h(void);	// get_temperature() from lsm6dso is faster
-void lp_calibrate_angular_rate(void);
-AngularRateDegreesPerSecond lp_get_angular_rate(void);
-AccelerationMilligForce lp_get_acceleration(void);
+void avnet_imu_initialize(void);
+void avnet_imu_close(void);
+float avnet_get_temperature(void);
+float avnet_get_pressure(void);
+float avnet_get_temperature_lps22h(void);	// get_temperature() from lsm6dso is faster
+void avnet_calibrate_angular_rate(void);
+AngularRateDegreesPerSecond avnet_get_angular_rate(void);
+AccelerationMilligForce avnet_get_acceleration(void);

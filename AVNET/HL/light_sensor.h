@@ -13,5 +13,5 @@
 
 #define ADC_CHANNEL 0
 
-bool lp_OpenADC(void);
-int lp_GetLightLevel(void);
+bool avnet_OpenADC(void);
+int avnet_GetLightLevel(void);

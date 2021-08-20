@@ -25,12 +25,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC
                            ../Common
                           )
 
-# set(ROOT_NAMESPACE azsphere_libs)
-
-#set_target_properties(${PROJECT_NAME} PROPERTIES
-#    VS_GLOBAL_KEYWORD "AzureSphere"
-#)
-
 set_source_files_properties(../Common/lsm6dso_reg.c PROPERTIES COMPILE_FLAGS -Wno-conversion)
 set_source_files_properties(../Common/lps22hh_reg.c PROPERTIES COMPILE_FLAGS -Wno-conversion)
 

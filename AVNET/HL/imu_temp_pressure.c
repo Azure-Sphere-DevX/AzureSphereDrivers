@@ -257,7 +257,7 @@ static void platform_init(void)
 //}
 
 
-AccelerationMilligForce lp_get_acceleration(void)
+AccelerationMilligForce avnet_get_acceleration(void)
 {
 	uint8_t reg;
 
@@ -293,7 +293,7 @@ AccelerationMilligForce lp_get_acceleration(void)
 }
 
 
-AngularRateDegreesPerSecond lp_get_angular_rate(void)
+AngularRateDegreesPerSecond avnet_get_angular_rate(void)
 {
 	uint8_t reg;
 
@@ -321,7 +321,7 @@ AngularRateDegreesPerSecond lp_get_angular_rate(void)
 }
 
 
-float lp_get_temperature_lps22h(void)	// get_temperature() from lsm6dso is faster
+float avnet_get_temperature_lps22h(void)	// get_temperature() from lsm6dso is faster
 {
 	lps22hh_reg_t lps22hhReg;
 	int16_t i16bit;
@@ -352,7 +352,7 @@ float lp_get_temperature_lps22h(void)	// get_temperature() from lsm6dso is faste
 
 
 
-float lp_get_temperature(void)
+float avnet_get_temperature(void)
 {
 	uint8_t reg;
 	axis1bit16_t data_raw_temperature;
@@ -375,7 +375,7 @@ float lp_get_temperature(void)
 }
 
 
-float lp_get_pressure(void)
+float avnet_get_pressure(void)
 {
 	lps22hh_reg_t lps22hhReg;
 	uint32_t ui32bit;
@@ -405,7 +405,7 @@ float lp_get_pressure(void)
 }
 
 
-void lp_calibrate_angular_rate(void)
+void avnet_calibrate_angular_rate(void)
 {
 	if (!initialized)
 	{
@@ -518,7 +518,7 @@ static void detect_lps22hh(void)
 }
 
 
-void lp_imu_initialize(void)
+void avnet_imu_initialize(void)
 {
 	if (initialized) { return; }
 
@@ -571,10 +571,10 @@ void lp_imu_initialize(void)
 	/* Configure filtering chain(No aux interface)
 	 * Accelerometer - LPF1 + LPF2 path
 	 */
-	lsm6dso_xl_hp_path_on_out_set(&dev_ctx, LSM6DSO_LP_ODR_DIV_100);
+	lsm6dso_xl_hp_path_on_out_set(&dev_ctx, LSM6DSO_avnet_ODR_DIV_100);
 	lsm6dso_xl_filter_lp2_set(&dev_ctx, PROPERTY_ENABLE);
 
-	//lp_calibrate_angular_rate();
+	//avnet_calibrate_angular_rate();
 
 	detect_lps22hh();
 
@@ -608,7 +608,7 @@ static void CloseFdPrintError(int fd, const char* fdName)
 /// <summary>
 ///     Closes the I2C interface File Descriptors.
 /// </summary>
-void lp_imu_close(void)
+void avnet_imu_close(void)
 {
 	CloseFdPrintError(i2cHandle, "i2c");
 }
