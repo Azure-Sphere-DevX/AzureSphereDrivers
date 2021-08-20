@@ -571,7 +571,7 @@ void avnet_imu_initialize(void)
 	/* Configure filtering chain(No aux interface)
 	 * Accelerometer - LPF1 + LPF2 path
 	 */
-	lsm6dso_xl_hp_path_on_out_set(&dev_ctx, LSM6DSO_avnet_ODR_DIV_100);
+	lsm6dso_xl_hp_path_on_out_set(&dev_ctx, LSM6DSO_LP_ODR_DIV_100);
 	lsm6dso_xl_filter_lp2_set(&dev_ctx, PROPERTY_ENABLE);
 
 	//avnet_calibrate_angular_rate();
