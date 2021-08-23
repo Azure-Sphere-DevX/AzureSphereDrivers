@@ -113,7 +113,7 @@ static bool initialized = false;
 static int32_t platform_write(void* handle, uint8_t reg, uint8_t* bufp, uint16_t len);
 static int32_t platform_read(void* handle, uint8_t reg, uint8_t* bufp, uint16_t len);
 static void platform_delay(uint32_t ms);
-static void platform_init(void);
+static void platform_init(I2C_InterfaceId i2c_interface_id);
 static int32_t lsm6dso_read_lps22hh_cx(void* ctx, uint8_t reg, uint8_t* data, uint16_t len);
 static int32_t lsm6dso_write_lps22hh_cx(void* ctx, uint8_t reg, uint8_t* data, uint16_t len);
 
