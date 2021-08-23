@@ -651,13 +651,13 @@ static int32_t lsm6dso_write_lps22hh_cx(void* ctx, uint8_t reg, uint8_t* data, u
 	lsm6dso_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
 	do
 	{
-		platform_delay(20);
+		platform_delay(5);
 		lsm6dso_xl_flag_data_ready_get(&dev_ctx, &drdy);
 	} while (!drdy);
 
 	do
 	{
-		platform_delay(20);
+		platform_delay(5);
 		lsm6dso_sh_status_get(&dev_ctx, &master_status);
 	} while (!master_status.sens_hub_endop);
 
