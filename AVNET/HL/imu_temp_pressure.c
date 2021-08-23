@@ -186,10 +186,10 @@ static void platform_delay(uint32_t ms)
 /*
  * @brief  platform specific initialization (platform dependent)
  */
-static void platform_init(void)
+static void platform_init(I2C_InterfaceId i2c_interface_id)
 {
 	// IMPLEMENT
-	i2cHandle = I2CMaster_Open(I2cMaster2);
+	i2cHandle = I2CMaster_Open(i2c_interface_id);
 	if (i2cHandle < 0)
 	{
 		Log_Debug("ERROR: I2CMaster_Open: errno=%d (%s)\n", errno, strerror(errno));
@@ -518,7 +518,7 @@ static void detect_lps22hh(void)
 }
 
 
-void avnet_imu_initialize(void)
+void avnet_imu_initialize(I2C_InterfaceId i2c_interface_id)
 {
 	if (initialized) { return; }
 
@@ -533,7 +533,7 @@ void avnet_imu_initialize(void)
 	pressure_ctx.handle = &i2cHandle;
 
 	/* Init test platform */
-	platform_init();
+	platform_init(i2c_interface_id);
 
 	/* Wait sensor boot time */
 	platform_delay(20);
