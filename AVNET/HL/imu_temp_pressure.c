@@ -713,13 +713,13 @@ static int32_t lsm6dso_read_lps22hh_cx(void* ctx, uint8_t reg, uint8_t* data, ui
 	lsm6dso_acceleration_raw_get(&dev_ctx, buf_raw);
 	do
 	{
-		platform_delay(20);
+		platform_delay(5);
 		lsm6dso_xl_flag_data_ready_get(&dev_ctx, &drdy);
 	} while (!drdy);
 
 	do
 	{
-		platform_delay(20);
+		platform_delay(5);
 		lsm6dso_sh_status_get(&dev_ctx, &master_status);
 	} while (!master_status.sens_hub_endop);
 
