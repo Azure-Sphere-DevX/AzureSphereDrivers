@@ -1,6 +1,5 @@
 #pragma once
 
-#include "hw/azure_sphere_learning_path.h"
 #include "lsm6dso_reg.h"
 #include "lps22hh_reg.h"
 #include <applibs/i2c.h>

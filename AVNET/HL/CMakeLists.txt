@@ -33,5 +33,3 @@ set_source_files_properties(imu_temp_pressure.c PROPERTIES COMPILE_FLAGS -Wno-in
 set_source_files_properties(imu_temp_pressure.c PROPERTIES COMPILE_FLAGS -Wno-conversion)
 
 target_link_libraries (${PROJECT_NAME} applibs pthread gcc_s c azureiot)
-
-azsphere_target_hardware_definition(${PROJECT_NAME} TARGET_DIRECTORY "../HardwareDefinitions/avnet_mt3620_sk" TARGET_DEFINITION "azure_sphere_learning_path.json")

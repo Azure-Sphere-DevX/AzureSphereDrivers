@@ -23,8 +23,8 @@ int avnet_get_light_level(void) {
 }
 
 
-bool avnet_open_adc(void) {
-    adcControllerFd = ADC_Open(AVNET_MT3620_SK_ADC_CONTROLLER0);
+bool avnet_open_adc(ADC_ControllerId adc_id) {
+    adcControllerFd = ADC_Open(adc_id);
     if (adcControllerFd < 0) {
         Log_Debug("ADC_Open failed with error: %s (%d)\n", strerror(errno), errno);
         return false;
