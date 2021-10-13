@@ -27,7 +27,7 @@ typedef struct
 	float z;
 } AccelerationMilligForce;
 
-void avnet_imu_initialize(I2C_InterfaceId i2c_interface_id);
+void avnet_imu_initialize(I2C_InterfaceId i2c_interface_id, uint32_t speedInHz);
 void avnet_imu_close(void);
 float avnet_get_temperature(void);
 float avnet_get_pressure(void);

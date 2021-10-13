@@ -113,7 +113,7 @@ static bool initialized = false;
 static int32_t platform_write(void* handle, uint8_t reg, uint8_t* bufp, uint16_t len);
 static int32_t platform_read(void* handle, uint8_t reg, uint8_t* bufp, uint16_t len);
 static void platform_delay(uint32_t ms);
-static void platform_init(I2C_InterfaceId i2c_interface_id);
+static void platform_init(I2C_InterfaceId i2c_interface_id, uint32_t speedInHz);
 static int32_t lsm6dso_read_lps22hh_cx(void* ctx, uint8_t reg, uint8_t* data, uint16_t len);
 static int32_t lsm6dso_write_lps22hh_cx(void* ctx, uint8_t reg, uint8_t* data, uint16_t len);
 
@@ -186,7 +186,7 @@ static void platform_delay(uint32_t ms)
 /*
  * @brief  platform specific initialization (platform dependent)
  */
-static void platform_init(I2C_InterfaceId i2c_interface_id)
+static void platform_init(I2C_InterfaceId i2c_interface_id, uint32_t speedInHz)
 {
 	// IMPLEMENT
 	i2cHandle = I2CMaster_Open(i2c_interface_id);
@@ -196,7 +196,7 @@ static void platform_init(I2C_InterfaceId i2c_interface_id)
 		return;
 	}
 
-	int result = I2CMaster_SetBusSpeed(i2cHandle, I2C_BUS_SPEED_STANDARD);
+	int result = I2CMaster_SetBusSpeed(i2cHandle, speedInHz);
 	if (result != 0)
 	{
 		Log_Debug("ERROR: I2CMaster_SetBusSpeed: errno=%d (%s)\n", errno, strerror(errno));
@@ -518,7 +518,7 @@ static void detect_lps22hh(void)
 }
 
 
-void avnet_imu_initialize(I2C_InterfaceId i2c_interface_id)
+void avnet_imu_initialize(I2C_InterfaceId i2c_interface_id, uint32_t speedInHz)
 {
 	if (initialized) { return; }
 
@@ -533,7 +533,7 @@ void avnet_imu_initialize(I2C_InterfaceId i2c_interface_id)
 	pressure_ctx.handle = &i2cHandle;
 
 	/* Init test platform */
-	platform_init(i2c_interface_id);
+	platform_init(i2c_interface_id, speedInHz);
 
 	/* Wait sensor boot time */
 	platform_delay(20);
