@@ -40,7 +40,7 @@
 #include <time.h>
 #include <unistd.h>
 
-int i2cHandle = -1;
+static int _i2c_fd = -1;
 
 
 /*
@@ -70,28 +70,9 @@ int16_t sensirion_i2c_select_bus(uint8_t bus_idx) {
  * Initialize all hard- and software components that are needed for the I2C
  * communication.
  */
-void sensirion_i2c_init(I2C_InterfaceId interfaceId, uint32_t speedInHz) {
-    // IMPLEMENT
-    i2cHandle = I2CMaster_Open(interfaceId);
-	if (i2cHandle < 0)
-	{
-		Log_Debug("ERROR: I2CMaster_Open: errno=%d (%s)\n", errno, strerror(errno));
-		return;
-	}
-
-	int result = I2CMaster_SetBusSpeed(i2cHandle, speedInHz);
-	if (result != 0)
-	{
-		Log_Debug("ERROR: I2CMaster_SetBusSpeed: errno=%d (%s)\n", errno, strerror(errno));
-		return;
-	}
-
-	result = I2CMaster_SetTimeout(i2cHandle, 100);
-	if (result != 0)
-	{
-		Log_Debug("ERROR: I2CMaster_SetTimeout: errno=%d (%s)\n", errno, strerror(errno));
-		return;
-	}
+void sensirion_i2c_init(int i2c_fd)
+{
+    _i2c_fd = i2c_fd;
 }
 
 /// <summary>
@@ -116,7 +97,7 @@ void CloseI2cHandle(int fd, const char* fdName)
  */
 void sensirion_i2c_release(void) {
     // IMPLEMENT or leave empty if no resources need to be freed
-	CloseI2cHandle(i2cHandle, "i2c");
+	CloseI2cHandle(_i2c_fd, "i2c");
 }
 
 /**
@@ -131,7 +112,7 @@ void sensirion_i2c_release(void) {
  */
 int8_t sensirion_i2c_read(uint8_t address, uint8_t* data, uint16_t count) {
 	// Read the data into the provided buffer
-	int32_t retVal = I2CMaster_Read(i2cHandle, address, data, count);
+	int32_t retVal = I2CMaster_Read(_i2c_fd, address, data, count);
 	if (retVal != count)
 	{
 		Log_Debug("ERROR: Expected return value to match count\n");
@@ -152,7 +133,7 @@ int8_t sensirion_i2c_read(uint8_t address, uint8_t* data, uint16_t count) {
  */
 int8_t sensirion_i2c_write(uint8_t address, const uint8_t* data, uint16_t count) {
     // IMPLEMENT
-	int32_t retVal = I2CMaster_Write(i2cHandle, address, data, count);
+	int32_t retVal = I2CMaster_Write(_i2c_fd, address, data, count);
 	if (retVal != count)
 	{
 		Log_Debug("ERROR: Expected return value to match count\n");
@@ -170,10 +151,16 @@ int8_t sensirion_i2c_write(uint8_t address, const uint8_t* data, uint16_t count)
  * @param useconds the sleep time in microseconds
  */
 void sensirion_sleep_usec(uint32_t useconds) {
-	struct timespec ts;
+    struct timespec req;
+    struct timespec rem;
+    long usec = (long)useconds;
 
-	ts.tv_sec = (long int)(useconds / 1000000u);
-	ts.tv_nsec = (long int)((useconds - ((long unsigned int)ts.tv_sec * 1000000u)) * 1000u);
+    req.tv_sec = usec / 1000000;
+    req.tv_nsec = (usec % 1000000) * 1000;
 
-	nanosleep(&ts, NULL);
+    while (nanosleep(&req, &rem) != 0)
+    {
+        req.tv_sec = rem.tv_sec;
+        req.tv_nsec = rem.tv_nsec;
+    }
 }

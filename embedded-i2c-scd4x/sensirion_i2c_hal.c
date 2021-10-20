@@ -33,6 +33,15 @@
 #include "sensirion_common.h"
 #include "sensirion_config.h"
 
+#include "time.h"
+#include <applibs/i2c.h>
+#include <applibs/log.h>
+#include <errno.h>
+#include <string.h>
+#include <unistd.h>
+
+static int _i2c_fd = -1;
+
 /*
  * INSTRUCTIONS
  * ============
@@ -62,15 +71,31 @@ int16_t sensirion_i2c_hal_select_bus(uint8_t bus_idx) {
  * Initialize all hard- and software components that are needed for the I2C
  * communication.
  */
-void sensirion_i2c_hal_init(void) {
-    /* TODO:IMPLEMENT */
+void sensirion_i2c_hal_init(int i2c_fd) {
+    // calling application must initialise extern int _i2c_fd;
+    _i2c_fd = i2c_fd;
+}
+
+/// <summary>
+///     Closes a file descriptor and prints an error on failure.
+/// </summary>
+/// <param name="fd">File descriptor to close</param>
+/// <param name="fdName">File descriptor name to use in error message</param>
+static void close_sdc4x_handle(int fd, const char* fdName) {
+    if (fd >= 0) {
+        int result = close(fd);
+        if (result != 0) {
+            Log_Debug("ERROR: Could not close fd %s: %s (%d).\n", fdName,
+                      strerror(errno), errno);
+        }
+    }
 }
 
 /**
  * Release all resources initialized by sensirion_i2c_hal_init().
  */
 void sensirion_i2c_hal_free(void) {
-    /* TODO:IMPLEMENT or leave empty if no resources need to be freed */
+    close_sdc4x_handle(_i2c_fd, "i2c");
 }
 
 /**
@@ -84,8 +109,11 @@ void sensirion_i2c_hal_free(void) {
  * @returns 0 on success, error code otherwise
  */
 int8_t sensirion_i2c_hal_read(uint8_t address, uint8_t* data, uint16_t count) {
-    /* TODO:IMPLEMENT */
-    return NOT_IMPLEMENTED_ERROR;
+    int32_t retVal = I2CMaster_Read(_i2c_fd, address, data, count);
+    if (retVal != count) {
+        Log_Debug("ERROR: Expected return value to match count\n");
+    }
+    return 0;
 }
 
 /**
@@ -101,8 +129,13 @@ int8_t sensirion_i2c_hal_read(uint8_t address, uint8_t* data, uint16_t count) {
  */
 int8_t sensirion_i2c_hal_write(uint8_t address, const uint8_t* data,
                                uint16_t count) {
-    /* TODO:IMPLEMENT */
-    return NOT_IMPLEMENTED_ERROR;
+
+    int32_t retVal = I2CMaster_Write(_i2c_fd, address, data, count);
+    if (retVal != count) {
+        Log_Debug("ERROR: Expected return value to match count\n");
+    }
+
+    return 0;
 }
 
 /**
@@ -114,5 +147,15 @@ int8_t sensirion_i2c_hal_write(uint8_t address, const uint8_t* data,
  * @param useconds the sleep time in microseconds
  */
 void sensirion_i2c_hal_sleep_usec(uint32_t useconds) {
-    /* TODO:IMPLEMENT */
+    struct timespec req;
+    struct timespec rem;
+    long usec = (long)useconds;
+
+    req.tv_sec = usec / 1000000;
+    req.tv_nsec = (usec % 1000000) * 1000;
+
+    while (nanosleep(&req, &rem) != 0) {
+        req.tv_sec = rem.tv_sec;
+        req.tv_nsec = rem.tv_nsec;
+    }
 }
