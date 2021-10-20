@@ -29,19 +29,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sensirion_arch_config.h"
+#include "sensirion_i2c_hal.h"
 #include "sensirion_common.h"
-#include "sensirion_i2c.h"
+#include "sensirion_config.h"
 
+#include "time.h"
 #include <applibs/i2c.h>
 #include <applibs/log.h>
 #include <errno.h>
 #include <string.h>
-#include <time.h>
 #include <unistd.h>
 
 static int _i2c_fd = -1;
-
 
 /*
  * INSTRUCTIONS
@@ -61,17 +60,19 @@ static int _i2c_fd = -1;
  * @param bus_idx   Bus index to select
  * @returns         0 on success, an error code otherwise
  */
-int16_t sensirion_i2c_select_bus(uint8_t bus_idx) {
-    // IMPLEMENT or leave empty if all sensors are located on one single bus
-    return STATUS_FAIL;
+int16_t sensirion_i2c_hal_select_bus(uint8_t bus_idx) {
+    /* TODO:IMPLEMENT or leave empty if all sensors are located on one single
+     * bus
+     */
+    return NOT_IMPLEMENTED_ERROR;
 }
 
 /**
  * Initialize all hard- and software components that are needed for the I2C
  * communication.
  */
-void sensirion_i2c_init(int i2c_fd)
-{
+void sensirion_i2c_hal_init(int i2c_fd) {
+    // calling application must initialise extern int _i2c_fd;
     _i2c_fd = i2c_fd;
 }
 
@@ -80,24 +81,21 @@ void sensirion_i2c_init(int i2c_fd)
 /// </summary>
 /// <param name="fd">File descriptor to close</param>
 /// <param name="fdName">File descriptor name to use in error message</param>
-void CloseI2cHandle(int fd, const char* fdName)
-{
-	if (fd >= 0)
-	{
-		int result = close(fd);
-		if (result != 0)
-		{
-			Log_Debug("ERROR: Could not close fd %s: %s (%d).\n", fdName, strerror(errno), errno);
-		}
-	}
+static void close_sdc4x_handle(int fd, const char* fdName) {
+    if (fd >= 0) {
+        int result = close(fd);
+        if (result != 0) {
+            Log_Debug("ERROR: Could not close fd %s: %s (%d).\n", fdName,
+                      strerror(errno), errno);
+        }
+    }
 }
 
 /**
- * Release all resources initialized by sensirion_i2c_init().
+ * Release all resources initialized by sensirion_i2c_hal_init().
  */
-void sensirion_i2c_release(void) {
-    // IMPLEMENT or leave empty if no resources need to be freed
-	CloseI2cHandle(_i2c_fd, "i2c");
+void sensirion_i2c_hal_free(void) {
+    close_sdc4x_handle(_i2c_fd, "i2c");
 }
 
 /**
@@ -110,14 +108,12 @@ void sensirion_i2c_release(void) {
  * @param count   number of bytes to read from I2C and store in the buffer
  * @returns 0 on success, error code otherwise
  */
-int8_t sensirion_i2c_read(uint8_t address, uint8_t* data, uint16_t count) {
-	// Read the data into the provided buffer
-	int32_t retVal = I2CMaster_Read(_i2c_fd, address, data, count);
-	if (retVal != count)
-	{
-		Log_Debug("ERROR: Expected return value to match count\n");
-	}
-	return 0;
+int8_t sensirion_i2c_hal_read(uint8_t address, uint8_t* data, uint16_t count) {
+    int32_t retVal = I2CMaster_Read(_i2c_fd, address, data, count);
+    if (retVal != count) {
+        Log_Debug("ERROR: Expected return value to match count\n");
+    }
+    return 0;
 }
 
 /**
@@ -131,15 +127,15 @@ int8_t sensirion_i2c_read(uint8_t address, uint8_t* data, uint16_t count) {
  * @param count   number of bytes to read from the buffer and send over I2C
  * @returns 0 on success, error code otherwise
  */
-int8_t sensirion_i2c_write(uint8_t address, const uint8_t* data, uint16_t count) {
-    // IMPLEMENT
-	int32_t retVal = I2CMaster_Write(_i2c_fd, address, data, count);
-	if (retVal != count)
-	{
-		Log_Debug("ERROR: Expected return value to match count\n");
-	}
+int8_t sensirion_i2c_hal_write(uint8_t address, const uint8_t* data,
+                               uint16_t count) {
 
-	return 0;
+    int32_t retVal = I2CMaster_Write(_i2c_fd, address, data, count);
+    if (retVal != count) {
+        Log_Debug("ERROR: Expected return value to match count\n");
+    }
+
+    return 0;
 }
 
 /**
@@ -150,7 +146,7 @@ int8_t sensirion_i2c_write(uint8_t address, const uint8_t* data, uint16_t count)
  *
  * @param useconds the sleep time in microseconds
  */
-void sensirion_sleep_usec(uint32_t useconds) {
+void sensirion_i2c_hal_sleep_usec(uint32_t useconds) {
     struct timespec req;
     struct timespec rem;
     long usec = (long)useconds;
@@ -158,8 +154,7 @@ void sensirion_sleep_usec(uint32_t useconds) {
     req.tv_sec = usec / 1000000;
     req.tv_nsec = (usec % 1000000) * 1000;
 
-    while (nanosleep(&req, &rem) != 0)
-    {
+    while (nanosleep(&req, &rem) != 0) {
         req.tv_sec = rem.tv_sec;
         req.tv_nsec = rem.tv_nsec;
     }

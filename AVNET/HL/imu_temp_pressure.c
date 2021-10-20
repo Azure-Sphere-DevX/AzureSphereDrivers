@@ -94,7 +94,7 @@ static uint8_t whoamI, rst;
 
 //static uint8_t tx_buffer[1000];
 
-static int i2cHandle = -1;
+static int _i2c_fd = -1;
 static stmdev_ctx_t dev_ctx;
 static stmdev_ctx_t pressure_ctx;
 static bool lps22hhDetected;
@@ -113,7 +113,7 @@ static bool initialized = false;
 static int32_t platform_write(void* handle, uint8_t reg, uint8_t* bufp, uint16_t len);
 static int32_t platform_read(void* handle, uint8_t reg, uint8_t* bufp, uint16_t len);
 static void platform_delay(uint32_t ms);
-static void platform_init(I2C_InterfaceId i2c_interface_id, uint32_t speedInHz);
+static void platform_init(int i2c_fd);
 static int32_t lsm6dso_read_lps22hh_cx(void* ctx, uint8_t reg, uint8_t* data, uint16_t len);
 static int32_t lsm6dso_write_lps22hh_cx(void* ctx, uint8_t reg, uint8_t* data, uint16_t len);
 
@@ -174,41 +174,26 @@ static int32_t platform_read(void* handle, uint8_t reg, uint8_t* bufp, uint16_t 
  */
 static void platform_delay(uint32_t ms)
 {
-	struct timespec ts;
+    struct timespec req;
+    struct timespec rem;
 
-	ts.tv_sec = (long int)(ms / 1000u);
-	ts.tv_nsec = (long int)((ms - ((long unsigned int)ts.tv_sec * 1000u)) * 1000000u);
+    req.tv_sec = (long int)(ms / 1000u);
+    req.tv_nsec = (long int)((ms - ((long unsigned int)req.tv_sec * 1000u)) * 1000000u);
 
-	nanosleep(&ts, NULL);
+    while (nanosleep(&req, &rem) != 0)
+    {
+        req.tv_sec = rem.tv_sec;
+        req.tv_nsec = rem.tv_nsec;
+    }
 }
 
 
 /*
  * @brief  platform specific initialization (platform dependent)
  */
-static void platform_init(I2C_InterfaceId i2c_interface_id, uint32_t speedInHz)
+static void platform_init(int i2c_fd)
 {
-	// IMPLEMENT
-	i2cHandle = I2CMaster_Open(i2c_interface_id);
-	if (i2cHandle < 0)
-	{
-		Log_Debug("ERROR: I2CMaster_Open: errno=%d (%s)\n", errno, strerror(errno));
-		return;
-	}
-
-	int result = I2CMaster_SetBusSpeed(i2cHandle, speedInHz);
-	if (result != 0)
-	{
-		Log_Debug("ERROR: I2CMaster_SetBusSpeed: errno=%d (%s)\n", errno, strerror(errno));
-		return;
-	}
-
-	result = I2CMaster_SetTimeout(i2cHandle, 100);
-	if (result != 0)
-	{
-		Log_Debug("ERROR: I2CMaster_SetTimeout: errno=%d (%s)\n", errno, strerror(errno));
-		return;
-	}
+	_i2c_fd = i2c_fd;
 }
 
 
@@ -518,22 +503,22 @@ static void detect_lps22hh(void)
 }
 
 
-void avnet_imu_initialize(I2C_InterfaceId i2c_interface_id, uint32_t speedInHz)
+void avnet_imu_initialize(int i2c_fd)
 {
 	if (initialized) { return; }
 
 	/* Initialize mems driver interface */
 	dev_ctx.write_reg = platform_write;
 	dev_ctx.read_reg = platform_read;
-	dev_ctx.handle = &i2cHandle;
+	dev_ctx.handle = &_i2c_fd;
 
 	// Initialize lps22hh mems driver interface
 	pressure_ctx.read_reg = lsm6dso_read_lps22hh_cx;
 	pressure_ctx.write_reg = lsm6dso_write_lps22hh_cx;
-	pressure_ctx.handle = &i2cHandle;
+	pressure_ctx.handle = &_i2c_fd;
 
 	/* Init test platform */
-	platform_init(i2c_interface_id, speedInHz);
+    platform_init(i2c_fd);
 
 	/* Wait sensor boot time */
 	platform_delay(20);
@@ -610,7 +595,7 @@ static void CloseFdPrintError(int fd, const char* fdName)
 /// </summary>
 void avnet_imu_close(void)
 {
-	CloseFdPrintError(i2cHandle, "i2c");
+	CloseFdPrintError(_i2c_fd, "i2c");
 }
 
 
