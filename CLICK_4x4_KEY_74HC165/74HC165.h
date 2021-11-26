@@ -47,5 +47,5 @@ typedef struct {
 } key4x4_t;
 
 
-void c4x4key_init(key4x4_t* key4x4);
+bool c4x4key_init(key4x4_t* key4x4);
 uint8_t c4x4key_get_btn_position(key4x4_t* key4x4);

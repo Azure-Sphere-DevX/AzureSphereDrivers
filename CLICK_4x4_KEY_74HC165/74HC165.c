@@ -4,19 +4,20 @@ static bool initialized = false;
 
 static int64_t get_now_milliseconds(void)
 {
-	struct timespec now = { 0,0 };
+	struct timespec now = {0, 0};
 	clock_gettime(CLOCK_MONOTONIC, &now);
 	return now.tv_sec * 1000 + now.tv_nsec / 1000000;
 }
 
-static bool c4x4key_get_data(key4x4_t* key4x4)
+static bool c4x4key_get_data(key4x4_t *key4x4)
 {
 	uint8_t rx_buf[2];
 	//uint16_t result;
 	SPIMaster_Transfer transfers;
 	ssize_t bytes = 0;
 
-	if (!initialized){
+	if (!initialized)
+	{
 		return false;
 	}
 
@@ -38,7 +39,7 @@ static bool c4x4key_get_data(key4x4_t* key4x4)
 	return true;
 }
 
-uint8_t c4x4key_get_btn_position(key4x4_t* key4x4)
+uint8_t c4x4key_get_btn_position(key4x4_t *key4x4)
 {
 	uint16_t result;
 	uint8_t position;
@@ -73,19 +74,21 @@ uint8_t c4x4key_get_btn_position(key4x4_t* key4x4)
 	}
 }
 
-
-void c4x4key_init(key4x4_t* key4x4)
+bool c4x4key_init(key4x4_t *key4x4)
 {
 	SPIMaster_Config key4x4Config;
 
 	SPIMaster_InitConfig(&key4x4Config);
 	key4x4Config.csPolarity = SPI_ChipSelectPolarity_ActiveHigh;
 
-	key4x4->handle = SPIMaster_Open(key4x4->interfaceId, key4x4->chipSelectId, &key4x4Config);
+	if ((key4x4->handle = SPIMaster_Open(key4x4->interfaceId, key4x4->chipSelectId, &key4x4Config)) == -1)
+	{
+		initialized = false;
+		return false;
+	};
+	initialized = true;
 
 	SPIMaster_SetBusSpeed(key4x4->handle, key4x4->busSpeed);
 	SPIMaster_SetBitOrder(key4x4->handle, SPI_BitOrder_MsbFirst);
 	SPIMaster_SetMode(key4x4->handle, SPI_Mode_2);
-
-	initialized = true;
 }
