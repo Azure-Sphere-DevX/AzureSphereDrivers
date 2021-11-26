@@ -20,13 +20,17 @@ bool eeprom2_init(SPI_InterfaceId interfaceId, SPI_ChipSelectId chipSelectId)
     SPIMaster_InitConfig(&eeprom2_config);
     eeprom2_config.csPolarity = SPI_ChipSelectPolarity_ActiveLow;
 
-    fd = SPIMaster_Open(interfaceId, chipSelectId, &eeprom2_config);
+    if ((fd = SPIMaster_Open(interfaceId, chipSelectId, &eeprom2_config)) == -1)
+    {
+        Log_Debug("Failed to open EEPROM2 on SPI interface :%d\n", interfaceId);
+        return false;
+    };
+
+    initialised = true;
 
     SPIMaster_SetBusSpeed(fd, 1000000);
     SPIMaster_SetBitOrder(fd, SPI_BitOrder_MsbFirst);
     SPIMaster_SetMode(fd, SPI_Mode_0);
-
-    initialised = true;
 }
 
 int eeprom2_memory_enable(void)
