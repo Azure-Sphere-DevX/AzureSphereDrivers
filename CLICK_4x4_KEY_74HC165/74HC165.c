@@ -1,5 +1,6 @@
 #include "74HC165.h"
 
+static bool initialized = false;
 
 static int64_t get_now_milliseconds(void)
 {
@@ -12,17 +13,21 @@ static bool c4x4key_get_data(key4x4_t* key4x4)
 {
 	uint8_t rx_buf[2];
 	//uint16_t result;
-	SPIMaster_Transfer transfer;
+	SPIMaster_Transfer transfers;
 	ssize_t bytes = 0;
 
-	SPIMaster_InitTransfers(&transfer, 1);
-	transfer.flags = SPI_TransferFlags_Read;
-	transfer.length = 2;
-	transfer.readData = rx_buf;
+	if (!initialized){
+		return false;
+	}
 
-	if ((bytes = SPIMaster_TransferSequential(key4x4->handle, &transfer, 1)) != transfer.length)
+	SPIMaster_InitTransfers(&transfers, 1);
+	transfers.flags = SPI_TransferFlags_Read;
+	transfers.length = 2;
+	transfers.readData = rx_buf;
+
+	if ((bytes = SPIMaster_TransferSequential(key4x4->handle, &transfers, 1)) != transfers.length)
 	{
-		Log_Debug("SPI Read Failed");
+		// Log_Debug("SPI Read Failed");
 		return false;
 	}
 
@@ -81,4 +86,6 @@ void c4x4key_init(key4x4_t* key4x4)
 	SPIMaster_SetBusSpeed(key4x4->handle, key4x4->busSpeed);
 	SPIMaster_SetBitOrder(key4x4->handle, SPI_BitOrder_MsbFirst);
 	SPIMaster_SetMode(key4x4->handle, SPI_Mode_2);
+
+	initialized = true;
 }

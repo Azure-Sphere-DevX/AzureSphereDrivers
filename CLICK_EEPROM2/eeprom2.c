@@ -49,7 +49,7 @@ int eeprom2_memory_enable(void)
 
     if (SPIMaster_TransferSequential(fd, &transfer, 1) != 1)
     {
-        printf("SPI Write Failed");
+        Log_Debug("SPI Write Failed");
         return -1;
     }
 
@@ -93,7 +93,7 @@ int eeprom2_write_bytes(uint32_t memory_address, uint8_t *value, uint8_t count)
 
     if ((bytes_written = SPIMaster_TransferSequential(fd, transfer, 2)) != 4 + count)
     {
-        printf("SPI Write Failed");
+        Log_Debug("SPI Write Failed");
         return -1;
     }
 

@@ -77,7 +77,7 @@ void as1115_write(as1115_t* retro_click, unsigned char reg_number, unsigned char
 	data[0] = reg_number;
 	data[1] = dataout;
 
-	if (I2CMaster_Write(retro_click->handle, AS1115_I2C_ADDRESS, data, sizeof(data)) != 2) {
+	if (I2CMaster_Write(retro_click->handle, AS1115_I2C_ADDRESS, (const uint8_t *)data, sizeof(data)) != 2) {
 		Log_Debug("I2C Write Failed\n");
 	}
 }
