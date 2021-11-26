@@ -33,7 +33,7 @@ typedef struct {
 
 void as1115_clear(as1115_t* retro_click);
 void as1115_display_test(as1115_t* retro_click, bool state);
-bool as1115_init(as1115_t* retro_click, unsigned char intialBrightness);
+bool as1115_init(int i2c_fd, as1115_t* retro_click, unsigned char intialBrightness);
 void as1115_panel_clear(as1115_t* retro_click);
 void as1115_panel_write(as1115_t* retro_click);
 void as1115_set_brightness(as1115_t* retro_click, unsigned char brightness);
