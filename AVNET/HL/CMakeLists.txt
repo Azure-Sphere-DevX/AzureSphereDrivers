@@ -32,4 +32,4 @@ set_source_files_properties(imu_temp_pressure.c PROPERTIES COMPILE_FLAGS -Wno-fl
 set_source_files_properties(imu_temp_pressure.c PROPERTIES COMPILE_FLAGS -Wno-incompatible-pointer-types)
 set_source_files_properties(imu_temp_pressure.c PROPERTIES COMPILE_FLAGS -Wno-conversion)
 
-target_link_libraries (${PROJECT_NAME} applibs pthread gcc_s c azureiot)
+target_link_libraries (${PROJECT_NAME} applibs pthread gcc_s c )

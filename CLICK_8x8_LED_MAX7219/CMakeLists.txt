@@ -18,8 +18,6 @@ set(ALL_FILES
 # Target
 ################################################################################
 add_library(${PROJECT_NAME} STATIC ${ALL_FILES})
-target_link_libraries (${PROJECT_NAME} applibs pthread gcc_s c azureiot)
+target_link_libraries (${PROJECT_NAME} applibs pthread gcc_s c )
 
 set_source_files_properties(graphics.c PROPERTIES COMPILE_FLAGS -Wno-conversion)
-
-azsphere_target_hardware_definition(${PROJECT_NAME} TARGET_DIRECTORY "../HardwareDefinitions/avnet_mt3620_sk" TARGET_DEFINITION "azure_sphere_learning_path.json")

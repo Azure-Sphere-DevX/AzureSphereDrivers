@@ -27,19 +27,12 @@ set(ALL_FILES
 ################################################################################
 add_library(${PROJECT_NAME} STATIC ${ALL_FILES})
 
-
-set(ROOT_NAMESPACE scd30_lib)
-target_include_directories(${PROJECT_NAME} PUBLIC ${AZURE_SPHERE_API_SET_DIR}/usr/include/azureiot)
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    VS_GLOBAL_KEYWORD "AzureSphere"
-)
-
 SET(GCC_COVERAGE_COMPILE_FLAGS "-Wall -fstrict-aliasing -Wstrict-aliasing=1 -Wsign-conversion -fPIC")
 
 set_source_files_properties( ./embedded-common/sensirion_common.c PROPERTIES COMPILE_FLAGS -Wno-conversion)
 add_definitions(${GCC_COVERAGE_COMPILE_FLAGS})
 
-target_link_libraries (${PROJECT_NAME} applibs pthread gcc_s c azureiot)
+target_link_libraries (${PROJECT_NAME} applibs pthread gcc_s c)
 
 
 if(AVNET)
