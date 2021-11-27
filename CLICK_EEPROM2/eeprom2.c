@@ -31,6 +31,8 @@ bool eeprom2_init(SPI_InterfaceId interfaceId, SPI_ChipSelectId chipSelectId)
     SPIMaster_SetBusSpeed(fd, 1000000);
     SPIMaster_SetBitOrder(fd, SPI_BitOrder_MsbFirst);
     SPIMaster_SetMode(fd, SPI_Mode_0);
+
+    return true;
 }
 
 int eeprom2_memory_enable(void)

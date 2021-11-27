@@ -90,4 +90,6 @@ bool max7219_init(matrix8x8_t *panel8x8, unsigned char intialBrightness)
     max7219_write(panel8x8, MAX7219_REG_SCAN_LIMIT, 7); // set up to scan all eight digits
     max7219_write(panel8x8, MAX7219_REG_DECODE, 0x00);	// set to "no decode" for all digits
     max7219_write(panel8x8, MAX7219_REG_SHUTDOWN, 1);	// put MAX7219 into "normal" mode
+
+    return true;
 }

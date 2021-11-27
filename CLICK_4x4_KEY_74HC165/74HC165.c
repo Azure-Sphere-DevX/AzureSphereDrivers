@@ -91,4 +91,6 @@ bool c4x4key_init(key4x4_t *key4x4)
     SPIMaster_SetBusSpeed(key4x4->handle, key4x4->busSpeed);
     SPIMaster_SetBitOrder(key4x4->handle, SPI_BitOrder_MsbFirst);
     SPIMaster_SetMode(key4x4->handle, SPI_Mode_2);
+
+    return true;
 }

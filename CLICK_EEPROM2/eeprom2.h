@@ -1,6 +1,7 @@
 #pragma once
 
 #include "applibs/spi.h"
+#include "applibs/log.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <time.h>
