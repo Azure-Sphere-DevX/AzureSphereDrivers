@@ -14,7 +14,7 @@ static bool c4x4key_get_data(as1115_t *retro_click)
     uint8_t buf[2];
     if (!initialized)
     {
-        return 0;
+        return false;
     }
 
     static const uint8_t register_address = KEYA_r;
@@ -41,13 +41,10 @@ static bool c4x4key_get_data(as1115_t *retro_click)
 
 uint8_t as1115_get_btn_position(as1115_t *retro_click)
 {
-    uint8_t position;
-
-    position = 0;
+    uint8_t position = 0;
 
     if (c4x4key_get_data(retro_click))
     {
-
         while (retro_click->keymap)
         {
             position++;
@@ -69,13 +66,9 @@ uint8_t as1115_get_btn_position(as1115_t *retro_click)
 
         retro_click->lastButtonPressMilliseconds = now_milliseconds;
         retro_click->lastButtonPressed = position;
+    }
 
-        return position;
-    }
-    else
-    {
-        return 0;
-    }
+    return position;
 }
 
 void as1115_write(as1115_t *retro_click, unsigned char reg_number, unsigned char dataout)
@@ -109,10 +102,11 @@ void as1115_display_test(as1115_t *retro_click, bool state)
 
 void as1115_clear(as1115_t *retro_click)
 {
-    char i;
-    for (i = 1; i < 9; i++)
+    for (char i = 1; i < 9; i++)
+    {
         // turn all segments off
         as1115_write(retro_click, i, 0x00);
+    }
 }
 
 void as1115_panel_write(as1115_t *retro_click)
@@ -154,9 +148,9 @@ bool as1115_init(int i2c_fd, as1115_t *retro_click, unsigned char intialBrightne
 
     retro_click->handle = i2c_fd;
 
-    as1115_write(retro_click, AS1115_REG_SCAN_LIMIT, 7); // set up to scan all eight digits
-    as1115_write(retro_click, AS1115_REG_DECODE, 0x00);	 // set to "no decode" for all digits
-    as1115_write(retro_click, AS1115_REG_SHUTDOWN, 1);	 // put AS1115 into "normal" mode
+    as1115_write(retro_click, AS1115_REG_SCAN_LIMIT, SCAN_LIMIT); // set up to scan all eight digits
+    as1115_write(retro_click, AS1115_REG_DECODE, 0x00);           // set to "no decode" for all digits
+    as1115_write(retro_click, AS1115_REG_SHUTDOWN, 1);            // put AS1115 into "normal" mode
 
     as1115_set_brightness(retro_click, intialBrightness);
 

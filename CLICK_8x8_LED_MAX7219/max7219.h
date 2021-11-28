@@ -13,6 +13,8 @@
 #define MAX7219_INTENSITY_MIN 0x00 // minimum display intensity
 #define MAX7219_INTENSITY_MAX 0x0f // maximum display intensity
 
+#define SCAN_LIMIT 7
+
 typedef struct
 {
     SPI_InterfaceId interfaceId;

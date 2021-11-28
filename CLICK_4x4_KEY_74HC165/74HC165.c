@@ -14,7 +14,6 @@ static bool c4x4key_get_data(key4x4_t *key4x4)
     uint8_t rx_buf[2];
     //uint16_t result;
     SPIMaster_Transfer transfers;
-    ssize_t bytes = 0;
 
     if (!initialized)
     {
@@ -26,7 +25,7 @@ static bool c4x4key_get_data(key4x4_t *key4x4)
     transfers.length = 2;
     transfers.readData = rx_buf;
 
-    if ((bytes = SPIMaster_TransferSequential(key4x4->handle, &transfers, 1)) != transfers.length)
+    if (SPIMaster_TransferSequential(key4x4->handle, &transfers, 1) != transfers.length)
     {
         // Log_Debug("SPI Read Failed");
         return false;
@@ -41,13 +40,11 @@ static bool c4x4key_get_data(key4x4_t *key4x4)
 
 uint8_t c4x4key_get_btn_position(key4x4_t *key4x4)
 {
-    uint16_t result;
-    uint8_t position;
-
-    position = 0;
-
     if (c4x4key_get_data(key4x4))
     {
+        uint16_t result;
+        uint8_t position = 0;
+
         result = (uint16_t)(C4X4KEY_MAX_16_BIT - key4x4->bitmap);
 
         while (result)
@@ -68,10 +65,7 @@ uint8_t c4x4key_get_btn_position(key4x4_t *key4x4)
 
         return position;
     }
-    else
-    {
-        return 0;
-    }
+    return 0;
 }
 
 bool c4x4key_init(key4x4_t *key4x4)

@@ -41,7 +41,6 @@ void max7219_display_test(matrix8x8_t *panel8x8, bool state)
 
 void max7219_clear(matrix8x8_t *panel8x8)
 {
-    char i;
     for (int i = 1; i < 9; i++){
         max7219_write(panel8x8, i, 0x00); // turn all segments off
     }
@@ -87,7 +86,7 @@ bool max7219_init(matrix8x8_t *panel8x8, unsigned char intialBrightness)
     max7219_set_brightness(panel8x8, intialBrightness); // set to maximum intensity
     max7219_display_test(panel8x8, false);				// disable test mode
 
-    max7219_write(panel8x8, MAX7219_REG_SCAN_LIMIT, 7); // set up to scan all eight digits
+    max7219_write(panel8x8, MAX7219_REG_SCAN_LIMIT, SCAN_LIMIT); // set up to scan all eight digits
     max7219_write(panel8x8, MAX7219_REG_DECODE, 0x00);	// set to "no decode" for all digits
     max7219_write(panel8x8, MAX7219_REG_SHUTDOWN, 1);	// put MAX7219 into "normal" mode
 

@@ -75,7 +75,6 @@ int eeprom2_write_bytes(uint32_t memory_address, uint8_t *value, uint8_t count)
     }
 
     SPIMaster_Transfer transfer[2];
-    ssize_t bytes_written = 0;
 
     uint8_t tx_buf[4];
 
@@ -97,7 +96,7 @@ int eeprom2_write_bytes(uint32_t memory_address, uint8_t *value, uint8_t count)
     transfer[1].writeData = value;
     transfer[1].readData = NULL;
 
-    if ((bytes_written = SPIMaster_TransferSequential(fd, transfer, 2)) != 4 + count)
+    if (SPIMaster_TransferSequential(fd, transfer, 2) != transfer[0].length + transfer[1].length)
     {
         Log_Debug("SPI Write Failed");
         return -1;
