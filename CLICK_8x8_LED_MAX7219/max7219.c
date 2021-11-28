@@ -1,3 +1,6 @@
+/* Copyright (c) Microsoft Corporation. All rights reserved.
+   Licensed under the MIT License. */
+
 #include "max7219.h"
 
 static bool initialized = false;

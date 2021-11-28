@@ -1,3 +1,6 @@
+/* Copyright (c) Microsoft Corporation. All rights reserved.
+   Licensed under the MIT License. */
+   
 #include "graphics.h"
 
 // https://github.com/MikroElektronika/Matrix_R_click/blob/master/library/__matrixr_driver.c

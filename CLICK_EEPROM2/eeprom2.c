@@ -1,3 +1,6 @@
+/* Copyright (c) Microsoft Corporation. All rights reserved.
+   Licensed under the MIT License. */
+
 #include "eeprom2.h"
 
 // https://github.com/MikroElektronika/mikrosdk_click_v2/blob/57e012d58e966f394a92cadf2551bbca4070e4bd/clicks/eeprom2/lib/src/eeprom2.c
