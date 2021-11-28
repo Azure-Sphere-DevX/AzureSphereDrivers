@@ -3,7 +3,7 @@
 
 #include "max7219.h"
 
-void max7219_write(matrix8x8_t *panel8x8, unsigned char reg_number, unsigned char dataout)
+void max7219_write(max7219_t *panel8x8, unsigned char reg_number, unsigned char dataout)
 {
     if (!panel8x8->initialized)
     {
@@ -29,18 +29,18 @@ void max7219_write(matrix8x8_t *panel8x8, unsigned char reg_number, unsigned cha
     }
 }
 
-void max7219_set_brightness(matrix8x8_t *panel8x8, unsigned char brightness)
+void max7219_set_brightness(max7219_t *panel8x8, unsigned char brightness)
 {
     brightness &= 0x0f;                                         // mask off extra bits
     max7219_write(panel8x8, MAX7219_REG_INTENSITY, brightness); // set brightness
 }
 
-void max7219_display_test(matrix8x8_t *panel8x8, bool state)
+void max7219_display_test(max7219_t *panel8x8, bool state)
 {
     max7219_write(panel8x8, MAX7219_REG_DISPLAY_TEST, state ? 1 : 0); // put MAX7219 into "display test" mode
 }
 
-void max7219_clear(matrix8x8_t *panel8x8)
+void max7219_clear(max7219_t *panel8x8)
 {
     for (int i = 1; i < 9; i++)
     {
@@ -48,7 +48,7 @@ void max7219_clear(matrix8x8_t *panel8x8)
     }
 }
 
-void max7219_panel_write(matrix8x8_t *panel8x8)
+void max7219_panel_write(max7219_t *panel8x8)
 {
     for (unsigned char i = 0; i < sizeof(panel8x8->bitmap); i++)
     {
@@ -56,7 +56,7 @@ void max7219_panel_write(matrix8x8_t *panel8x8)
     }
 }
 
-void max7219_panel_clear(matrix8x8_t *panel8x8)
+void max7219_panel_clear(max7219_t *panel8x8)
 {
     for (size_t i = 0; i < sizeof(panel8x8->bitmap); i++)
     {
@@ -66,7 +66,7 @@ void max7219_panel_clear(matrix8x8_t *panel8x8)
     max7219_panel_write(panel8x8);
 }
 
-bool max7219_init(matrix8x8_t *panel8x8, unsigned char intialBrightness)
+bool max7219_init(max7219_t *panel8x8, unsigned char intialBrightness)
 {
     if (panel8x8->initialized)
     {

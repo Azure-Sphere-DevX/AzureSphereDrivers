@@ -31,12 +31,12 @@ typedef struct
         uint64_t bitmap64;
     };
 
-} matrix8x8_t;
+} max7219_t;
 
-void max7219_clear(matrix8x8_t *panel8x8);
-void max7219_display_test(matrix8x8_t *panel8x8, bool state);
-bool max7219_init(matrix8x8_t *panel8x8, unsigned char intialBrightness);
-void max7219_panel_clear(matrix8x8_t *panel8x8);
-void max7219_panel_write(matrix8x8_t *panel8x8);
-void max7219_set_brightness(matrix8x8_t *panel8x8, unsigned char brightness);
-void max7219_write(matrix8x8_t *panel8x8, unsigned char reg_number, unsigned char dataout);
+void max7219_clear(max7219_t *panel8x8);
+void max7219_display_test(max7219_t *panel8x8, bool state);
+bool max7219_init(max7219_t *panel8x8, unsigned char intialBrightness);
+void max7219_panel_clear(max7219_t *panel8x8);
+void max7219_panel_write(max7219_t *panel8x8);
+void max7219_set_brightness(max7219_t *panel8x8, unsigned char brightness);
+void max7219_write(max7219_t *panel8x8, unsigned char reg_number, unsigned char dataout);
