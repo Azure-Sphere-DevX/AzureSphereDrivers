@@ -127,7 +127,6 @@ int eeprom2_read_bytes(uint32_t memory_address, uint8_t *value, uint8_t count)
         return 0;
     }
 
-    ssize_t bytes_read = 0;
     uint8_t tx_buf[4];
     int64_t time_diff = dx_getNowMilliseconds() - last_write_time;
 
@@ -144,7 +143,7 @@ int eeprom2_read_bytes(uint32_t memory_address, uint8_t *value, uint8_t count)
     tx_buf[2] = (uint8_t)((memory_address >> 8) & 0x000000FF);
     tx_buf[3] = (uint8_t)(memory_address & 0x000000FF);
 
-    if ((bytes_read = SPIMaster_WriteThenRead(fd, tx_buf, 4, value, count)) != 4 + count)
+    if (SPIMaster_WriteThenRead(fd, tx_buf, 4, value, count) != 4 + count)
     {
         return -1;
     }
