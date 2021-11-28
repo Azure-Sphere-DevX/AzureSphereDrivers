@@ -47,6 +47,7 @@ typedef struct
     uint8_t lastButtonPressed;
     int64_t lastButtonPressMilliseconds;
     int debouncePeriodMilliseconds;
+    bool initialized;
 } key4x4_t;
 
 bool c4x4key_init(key4x4_t *key4x4);

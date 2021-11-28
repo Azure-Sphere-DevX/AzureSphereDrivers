@@ -3,8 +3,6 @@
 
 #include "74HC165.h"
 
-static bool initialized = false;
-
 static int64_t get_now_milliseconds(void)
 {
     struct timespec now = {0, 0};
@@ -18,7 +16,7 @@ static bool c4x4key_get_data(key4x4_t *key4x4)
     //uint16_t result;
     SPIMaster_Transfer transfers;
 
-    if (!initialized)
+    if (!key4x4->initialized)
     {
         return false;
     }
@@ -73,6 +71,11 @@ uint8_t c4x4key_get_btn_position(key4x4_t *key4x4)
 
 bool c4x4key_init(key4x4_t *key4x4)
 {
+    if (key4x4->initialized)
+    {
+        return true;
+    }
+
     SPIMaster_Config key4x4Config;
 
     SPIMaster_InitConfig(&key4x4Config);
@@ -80,10 +83,10 @@ bool c4x4key_init(key4x4_t *key4x4)
 
     if ((key4x4->handle = SPIMaster_Open(key4x4->interfaceId, key4x4->chipSelectId, &key4x4Config)) == -1)
     {
-        initialized = false;
         return false;
     };
-    initialized = true;
+
+    key4x4->initialized = true;
 
     SPIMaster_SetBusSpeed(key4x4->handle, key4x4->busSpeed);
     SPIMaster_SetBitOrder(key4x4->handle, SPI_BitOrder_MsbFirst);

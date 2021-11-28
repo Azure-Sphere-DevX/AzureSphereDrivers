@@ -3,11 +3,9 @@
 
 #include "max7219.h"
 
-static bool initialized = false;
-
 void max7219_write(matrix8x8_t *panel8x8, unsigned char reg_number, unsigned char dataout)
 {
-    if (!initialized)
+    if (!panel8x8->initialized)
     {
         return;
     }
@@ -33,7 +31,7 @@ void max7219_write(matrix8x8_t *panel8x8, unsigned char reg_number, unsigned cha
 
 void max7219_set_brightness(matrix8x8_t *panel8x8, unsigned char brightness)
 {
-    brightness &= 0x0f;											// mask off extra bits
+    brightness &= 0x0f;                                         // mask off extra bits
     max7219_write(panel8x8, MAX7219_REG_INTENSITY, brightness); // set brightness
 }
 
@@ -44,7 +42,8 @@ void max7219_display_test(matrix8x8_t *panel8x8, bool state)
 
 void max7219_clear(matrix8x8_t *panel8x8)
 {
-    for (int i = 1; i < 9; i++){
+    for (int i = 1; i < 9; i++)
+    {
         max7219_write(panel8x8, i, 0x00); // turn all segments off
     }
 }
@@ -69,6 +68,11 @@ void max7219_panel_clear(matrix8x8_t *panel8x8)
 
 bool max7219_init(matrix8x8_t *panel8x8, unsigned char intialBrightness)
 {
+    if (panel8x8->initialized)
+    {
+        return true;
+    }
+
     SPIMaster_Config max7219Config;
 
     SPIMaster_InitConfig(&max7219Config);
@@ -76,22 +80,21 @@ bool max7219_init(matrix8x8_t *panel8x8, unsigned char intialBrightness)
 
     if ((panel8x8->handle = SPIMaster_Open(panel8x8->interfaceId, panel8x8->chipSelectId, &max7219Config)) == -1)
     {
-        initialized = false;
         return false;
     }
 
-    initialized = true;
+    panel8x8->initialized = true;
 
     SPIMaster_SetBusSpeed(panel8x8->handle, panel8x8->busSpeed);
     SPIMaster_SetBitOrder(panel8x8->handle, SPI_BitOrder_MsbFirst);
     SPIMaster_SetMode(panel8x8->handle, SPI_Mode_0);
 
     max7219_set_brightness(panel8x8, intialBrightness); // set to maximum intensity
-    max7219_display_test(panel8x8, false);				// disable test mode
+    max7219_display_test(panel8x8, false);              // disable test mode
 
     max7219_write(panel8x8, MAX7219_REG_SCAN_LIMIT, SCAN_LIMIT); // set up to scan all eight digits
-    max7219_write(panel8x8, MAX7219_REG_DECODE, 0x00);	// set to "no decode" for all digits
-    max7219_write(panel8x8, MAX7219_REG_SHUTDOWN, 1);	// put MAX7219 into "normal" mode
+    max7219_write(panel8x8, MAX7219_REG_DECODE, 0x00);           // set to "no decode" for all digits
+    max7219_write(panel8x8, MAX7219_REG_SHUTDOWN, 1);            // put MAX7219 into "normal" mode
 
     return true;
 }

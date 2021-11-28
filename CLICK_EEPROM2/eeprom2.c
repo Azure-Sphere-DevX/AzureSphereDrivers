@@ -5,9 +5,7 @@
 
 // https://github.com/MikroElektronika/mikrosdk_click_v2/blob/57e012d58e966f394a92cadf2551bbca4070e4bd/clicks/eeprom2/lib/src/eeprom2.c
 
-static int fd = -1;
 static int64_t last_write_time = UINT64_MAX;
-static bool initialised = false;
 
 static int64_t dx_getNowMilliseconds(void)
 {
@@ -16,31 +14,35 @@ static int64_t dx_getNowMilliseconds(void)
     return now.tv_sec * 1000 + now.tv_nsec / 1000000;
 }
 
-bool eeprom2_init(SPI_InterfaceId interfaceId, SPI_ChipSelectId chipSelectId)
+bool eeprom2_init(eeprom2_t * eeprom2)
 {
+    if (eeprom2->initialized){
+        return true;
+    }
+
     SPIMaster_Config eeprom2_config;
 
     SPIMaster_InitConfig(&eeprom2_config);
     eeprom2_config.csPolarity = SPI_ChipSelectPolarity_ActiveLow;
 
-    if ((fd = SPIMaster_Open(interfaceId, chipSelectId, &eeprom2_config)) == -1)
+    if ((eeprom2->fd = SPIMaster_Open(eeprom2->interfaceId, eeprom2->chipSelectId, &eeprom2_config)) == -1)
     {
-        Log_Debug("Failed to open EEPROM2 on SPI interface :%d\n", interfaceId);
+        Log_Debug("Failed to open EEPROM2 on SPI interface :%d\n", eeprom2->interfaceId);
         return false;
     };
+    
+    eeprom2->initialized = true;
 
-    initialised = true;
-
-    SPIMaster_SetBusSpeed(fd, 1000000);
-    SPIMaster_SetBitOrder(fd, SPI_BitOrder_MsbFirst);
-    SPIMaster_SetMode(fd, SPI_Mode_0);
+    SPIMaster_SetBusSpeed(eeprom2->fd, 1000000);
+    SPIMaster_SetBitOrder(eeprom2->fd, SPI_BitOrder_MsbFirst);
+    SPIMaster_SetMode(eeprom2->fd, SPI_Mode_0);
 
     return true;
 }
 
-int eeprom2_memory_enable(void)
+int eeprom2_memory_enable(eeprom2_t * eeprom2)
 {
-    if (!initialised)
+    if (!eeprom2->initialized)
     {
         return -1;
     }
@@ -56,7 +58,7 @@ int eeprom2_memory_enable(void)
     transfer.writeData = &temp;
     transfer.readData = NULL;
 
-    if (SPIMaster_TransferSequential(fd, &transfer, 1) != 1)
+    if (SPIMaster_TransferSequential(eeprom2->fd, &transfer, 1) != 1)
     {
         Log_Debug("SPI Write Failed");
         return -1;
@@ -65,9 +67,9 @@ int eeprom2_memory_enable(void)
     return 0;
 }
 
-int eeprom2_write_bytes(uint32_t memory_address, uint8_t *value, uint8_t count)
+int eeprom2_write_bytes(eeprom2_t * eeprom2, uint32_t memory_address, uint8_t *value, uint8_t count)
 {
-    if (!initialised)
+    if (!eeprom2->initialized)
     {
         return -1;
     }
@@ -81,7 +83,7 @@ int eeprom2_write_bytes(uint32_t memory_address, uint8_t *value, uint8_t count)
 
     uint8_t tx_buf[4];
 
-    eeprom2_memory_enable();
+    eeprom2_memory_enable(eeprom2);
 
     tx_buf[0] = 0x02;
     tx_buf[1] = (uint8_t)((memory_address >> 16) & 0x000000FF);
@@ -99,7 +101,7 @@ int eeprom2_write_bytes(uint32_t memory_address, uint8_t *value, uint8_t count)
     transfer[1].writeData = value;
     transfer[1].readData = NULL;
 
-    if (SPIMaster_TransferSequential(fd, transfer, 2) != transfer[0].length + transfer[1].length)
+    if (SPIMaster_TransferSequential(eeprom2->fd, transfer, 2) != transfer[0].length + transfer[1].length)
     {
         Log_Debug("SPI Write Failed");
         return -1;
@@ -110,14 +112,14 @@ int eeprom2_write_bytes(uint32_t memory_address, uint8_t *value, uint8_t count)
     return count;
 }
 
-int eeprom2_write(uint32_t memory_address, uint8_t value)
+int eeprom2_write(eeprom2_t * eeprom2, uint32_t memory_address, uint8_t value)
 {
-    return eeprom2_write_bytes(memory_address, &value, 1);
+    return eeprom2_write_bytes(eeprom2, memory_address, &value, 1);
 }
 
-int eeprom2_read_bytes(uint32_t memory_address, uint8_t *value, uint8_t count)
+int eeprom2_read_bytes(eeprom2_t * eeprom2, uint32_t memory_address, uint8_t *value, uint8_t count)
 {
-    if (!initialised)
+    if (!eeprom2->initialized)
     {
         return -1;
     }
@@ -136,14 +138,14 @@ int eeprom2_read_bytes(uint32_t memory_address, uint8_t *value, uint8_t count)
         nanosleep(&(struct timespec){0, delay * 1000000}, NULL);
     }
 
-    eeprom2_memory_enable();
+    eeprom2_memory_enable(eeprom2);
 
     tx_buf[0] = 0x03;
     tx_buf[1] = (uint8_t)((memory_address >> 16) & 0x000000FF);
     tx_buf[2] = (uint8_t)((memory_address >> 8) & 0x000000FF);
     tx_buf[3] = (uint8_t)(memory_address & 0x000000FF);
 
-    if (SPIMaster_WriteThenRead(fd, tx_buf, 4, value, count) != 4 + count)
+    if (SPIMaster_WriteThenRead(eeprom2->fd, tx_buf, 4, value, count) != 4 + count)
     {
         return -1;
     }
@@ -151,7 +153,7 @@ int eeprom2_read_bytes(uint32_t memory_address, uint8_t *value, uint8_t count)
     return count;
 }
 
-int eeprom2_read(uint32_t memory_address, uint8_t *value)
+int eeprom2_read(eeprom2_t * eeprom2, uint32_t memory_address, uint8_t *value)
 {
-    return eeprom2_read_bytes(memory_address, value, 1);
+    return eeprom2_read_bytes(eeprom2, memory_address, value, 1);
 }

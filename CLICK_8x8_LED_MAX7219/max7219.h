@@ -24,6 +24,7 @@ typedef struct
     SPI_ChipSelectId chipSelectId;
     uint32_t busSpeed;
     int handle;
+    bool initialized;
     union
     {
         unsigned char bitmap[8];
