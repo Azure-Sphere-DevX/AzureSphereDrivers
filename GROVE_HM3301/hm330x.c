@@ -1,6 +1,6 @@
 /* Copyright (c) Microsoft Corporation. All rights reserved.
    Licensed under the MIT License. */
-   
+
 #include "hm330x.h"
 
 static uint8_t input_buffer[29];
@@ -65,11 +65,11 @@ bool hm330x_read(hm330x_t *sensor)
 
     if (I2CMaster_Read(sensor->fd, HM33X_I2C_ADDRESS, input_buffer, sizeof(input_buffer)) != sizeof(input_buffer))
     {
-        Log_Debug("HM33X sensor read failed\n");
+        // Log_Debug("HM33X sensor read failed\n");
         return false;
     }
 
-    return parse_result_value(sensor, input_buffer);
+    return sensor->valid_data = parse_result_value(sensor, input_buffer);
 }
 
 bool hm330x_init(int i2c_fd, hm330x_t *sensor)
@@ -97,6 +97,13 @@ bool hm330x_init(int i2c_fd, hm330x_t *sensor)
     {
         Log_Debug("HM330X cmd failed.\n");
         return false;
+    }
+
+    // Note, on power up the first read checksum is can be invalid, so retry
+    int retry = 0;
+    while (!hm330x_read(sensor) && retry++ < 4)
+    {
+        nanosleep(&(struct timespec){0, 500 * 1000000}, NULL);
     }
 
     return true;

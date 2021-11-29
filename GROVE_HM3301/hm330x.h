@@ -40,6 +40,7 @@ typedef struct
 typedef struct {
     int fd;
     bool initialized;
+    bool valid_data;
     PARTICULATE_MATTER_DATA data;
 } hm330x_t;
 
