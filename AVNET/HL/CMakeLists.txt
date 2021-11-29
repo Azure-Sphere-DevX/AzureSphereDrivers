@@ -21,9 +21,7 @@ set(ALL_FILES
 ################################################################################
 add_library(${PROJECT_NAME} STATIC ${ALL_FILES})
 
-target_include_directories(${PROJECT_NAME} PUBLIC
-                           ../Common
-                          )
+target_include_directories(${PROJECT_NAME} PUBLIC ../Common .)
 
 set_source_files_properties(../Common/lsm6dso_reg.c PROPERTIES COMPILE_FLAGS -Wno-conversion)
 set_source_files_properties(../Common/lps22hh_reg.c PROPERTIES COMPILE_FLAGS -Wno-conversion)
@@ -32,4 +30,4 @@ set_source_files_properties(imu_temp_pressure.c PROPERTIES COMPILE_FLAGS -Wno-fl
 set_source_files_properties(imu_temp_pressure.c PROPERTIES COMPILE_FLAGS -Wno-incompatible-pointer-types)
 set_source_files_properties(imu_temp_pressure.c PROPERTIES COMPILE_FLAGS -Wno-conversion)
 
-target_link_libraries (${PROJECT_NAME} applibs pthread gcc_s c )
+target_link_libraries(${PROJECT_NAME} applibs gcc_s c )
