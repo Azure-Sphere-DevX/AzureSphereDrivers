@@ -41,6 +41,8 @@ static bool c4x4key_get_data(key4x4_t *key4x4)
 
 uint8_t c4x4key_get_btn_position(key4x4_t *key4x4)
 {
+    const uint8_t buttonMap[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 13};
+
     if (c4x4key_get_data(key4x4))
     {
         uint16_t result;
@@ -62,6 +64,11 @@ uint8_t c4x4key_get_btn_position(key4x4_t *key4x4)
         }
 
         key4x4->lastButtonPressMilliseconds = now_milliseconds;
+
+        
+        // key 13, 14, 15, 16 need to be remapped
+        position = buttonMap[position - 1];
+
         key4x4->lastButtonPressed = position;
 
         return position;
