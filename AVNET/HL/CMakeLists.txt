@@ -21,7 +21,7 @@ set(ALL_FILES
 ################################################################################
 add_library(${PROJECT_NAME} STATIC ${ALL_FILES})
 
-target_include_directories(${PROJECT_NAME} PUBLIC ../Common .)
+target_include_directories(${PROJECT_NAME} PUBLIC "../Common" ".")
 
 set_source_files_properties(../Common/lsm6dso_reg.c PROPERTIES COMPILE_FLAGS -Wno-conversion)
 set_source_files_properties(../Common/lps22hh_reg.c PROPERTIES COMPILE_FLAGS -Wno-conversion)

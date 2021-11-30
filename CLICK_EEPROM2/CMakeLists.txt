@@ -18,6 +18,6 @@ set(ALL_FILES
 # Target
 ################################################################################
 add_library(${PROJECT_NAME} STATIC ${ALL_FILES})
-target_link_libraries (${PROJECT_NAME} gcc_s c)
-target_link_libraries(${PROJECT_NAME} applibs)
+target_link_libraries (${PROJECT_NAME} gcc_s applibs c)
 
+target_include_directories(${PROJECT_NAME} PUBLIC "." )
