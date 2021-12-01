@@ -45,7 +45,7 @@ static bool parse_result_value(hm330x_t *sensor, uint8_t *data)
     }
     if (sum != data[28])
     {
-        Log_Debug("Particulate matter sensor: Invalid checkSum returned\n");
+        // Log_Debug("Particulate matter sensor: Invalid checkSum returned\n");
         return false;
     }
 
