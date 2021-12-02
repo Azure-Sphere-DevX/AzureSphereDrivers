@@ -38,10 +38,10 @@ static bool parse_result_value(hm330x_t *sensor, uint8_t *data)
         return false;
     }
 
-    int sum = 0;
+    uint8_t sum = 0;
     for (int i = 0; i < 28; i++)
     {
-        sum += data[i];
+        sum = (uint8_t)(sum + data[i]);
     }
     if (sum != data[28])
     {
