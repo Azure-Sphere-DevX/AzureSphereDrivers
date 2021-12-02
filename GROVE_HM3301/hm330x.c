@@ -17,7 +17,7 @@ const char *str[] = {
 
 uint16_t get_value(uint8_t *data, int index)
 {
-    return (uint16_t)data[index * 2] << 8 | data[index * 2 + 1];
+    return (uint16_t)((uint16_t)data[index * 2] << 8 | data[index * 2 + 1]);
 }
 
 /*parse buf with 29 uint8_t-data*/
@@ -38,7 +38,7 @@ static bool parse_result_value(hm330x_t *sensor, uint8_t *data)
         return false;
     }
 
-    uint8_t sum = 0;
+    int sum = 0;
     for (int i = 0; i < 28; i++)
     {
         sum += data[i];
