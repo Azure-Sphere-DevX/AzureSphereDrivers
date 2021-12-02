@@ -42,7 +42,7 @@ void max7219_display_test(max7219_t *panel8x8, bool state)
 
 void max7219_clear(max7219_t *panel8x8)
 {
-    for (int i = 1; i < 9; i++)
+    for (uint8_t i = 1; i < 9; i++)
     {
         max7219_write(panel8x8, i, 0x00); // turn all segments off
     }
