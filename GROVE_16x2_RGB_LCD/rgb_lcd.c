@@ -55,7 +55,7 @@ bool RGBLCD_Init(rgb_lcd_16x2_t* rgb_lcd_16x2)
 
     rgb_lcd_16x2->initialized = true;
 
-    ListI2CDevices(rgb_lcd_16x2->fd);
+    // ListI2CDevices(rgb_lcd_16x2->fd);
 
     return true;
 }
