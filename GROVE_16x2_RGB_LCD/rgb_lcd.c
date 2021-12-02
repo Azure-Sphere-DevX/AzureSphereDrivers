@@ -41,7 +41,7 @@ static void textCommand(rgb_lcd_16x2_t *rgb_lcd_16x2, uint8_t cmd)
     WriteI2CData(rgb_lcd_16x2, data, 2);
 }
 
-bool RGBLCD_Init(rgb_lcd_16x2_t* rgb_lcd_16x2)
+bool RGBLCD_Init(rgb_lcd_16x2_t *rgb_lcd_16x2)
 {
     if (rgb_lcd_16x2->initialized)
     {
@@ -54,6 +54,12 @@ bool RGBLCD_Init(rgb_lcd_16x2_t* rgb_lcd_16x2)
     }
 
     rgb_lcd_16x2->initialized = true;
+
+    textCommand(rgb_lcd_16x2, 0x01);
+    delay(50);
+    textCommand(rgb_lcd_16x2, 0x08 | 0x04); // display on, no cursor
+    textCommand(rgb_lcd_16x2, 0x28);        // 2 lines
+    delay(50);
 
     // ListI2CDevices(rgb_lcd_16x2->fd);
 
@@ -73,10 +79,6 @@ void RGBLCD_SetColor(rgb_lcd_16x2_t *rgb_lcd_16x2, uint8_t r, uint8_t g, uint8_t
 void RGBLCD_SetText(rgb_lcd_16x2_t *rgb_lcd_16x2, char *data)
 {
     textCommand(rgb_lcd_16x2, 0x01);
-    delay(50);
-    textCommand(rgb_lcd_16x2, 0x08 | 0x04); // display on, no cursor
-    textCommand(rgb_lcd_16x2, 0x28);        // 2 lines
-    delay(50);
 
     int count = 0;
     int row = 0;
