@@ -18,7 +18,7 @@ set(ALL_FILES
 # Target
 ################################################################################
 add_library(${PROJECT_NAME} STATIC ${ALL_FILES})
-target_link_libraries (${PROJECT_NAME} applibs gcc_s c )
+target_link_libraries (${PROJECT_NAME} applibs c )
 
 set_source_files_properties(graphics.c PROPERTIES COMPILE_FLAGS -Wno-conversion)
 target_include_directories(${PROJECT_NAME} PUBLIC "." )

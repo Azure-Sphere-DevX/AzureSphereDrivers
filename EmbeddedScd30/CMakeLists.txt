@@ -32,7 +32,7 @@ SET(GCC_COVERAGE_COMPILE_FLAGS "-Wall -fstrict-aliasing -Wstrict-aliasing=1 -Wsi
 set_source_files_properties( ./embedded-common/sensirion_common.c PROPERTIES COMPILE_FLAGS -Wno-conversion)
 add_definitions(${GCC_COVERAGE_COMPILE_FLAGS})
 
-target_link_libraries (${PROJECT_NAME} applibs pthread gcc_s c)
+target_link_libraries (${PROJECT_NAME} applibs pthread c)
 
 
 if(AVNET)
