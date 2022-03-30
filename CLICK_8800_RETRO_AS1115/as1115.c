@@ -93,7 +93,8 @@ void as1115_write(as1115_t *retro_click, unsigned char reg_number, unsigned char
 
 void as1115_set_brightness(as1115_t *retro_click, unsigned char brightness)
 {
-    brightness &= 0x0f; // mask off extra bits
+    // range is from 0 (low) 7 (high) ie 3 bits 111 or 0x07
+    brightness &= 0x07; // mask off extra bits
     as1115_write(retro_click, AS1115_REG_INTENSITY, brightness);
 }
 
