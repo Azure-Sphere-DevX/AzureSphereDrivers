@@ -21,13 +21,16 @@ static bool c4x4key_get_data(as1115_t *retro_click)
     }
 
     static const uint8_t register_address = KEYA_r;
-    unsigned char temp;
 
     if (I2CMaster_WriteThenRead(retro_click->handle, AS1115_I2C_ADDRESS, &register_address, sizeof(register_address), (uint8_t *)buf, sizeof(buf)) != 3)
     {
         Log_Debug("AS1115 Key read failed\n");
         return false;
     }
+
+    #ifndef RETRO_CLICK_PRODUCTION
+
+    unsigned char temp;
 
     // rotate result left by 1 bit
     temp = buf[0];
@@ -36,6 +39,8 @@ static bool c4x4key_get_data(as1115_t *retro_click)
     // rotate result left by 1 bit
     temp = buf[1];
     buf[1] = (uint8_t)(buf[1] << 1 | (uint8_t)(temp >> 7));
+
+    #endif
 
     retro_click->keymap = (uint16_t) ~(buf[0] << 8 | (uint16_t)buf[1]);
 
@@ -118,6 +123,7 @@ void as1115_panel_write(as1115_t *retro_click)
     for (unsigned char i = 0; i < sizeof(retro_click->bitmap); i++)
     {
 
+#ifndef RETRO_CLICK_PRODUCTION
         // Work around for hardware issue - column addressing is good
         // Row address needs to be rotated as
         // bit 2 was displayed at led 1
@@ -125,6 +131,7 @@ void as1115_panel_write(as1115_t *retro_click)
         unsigned char temp = retro_click->bitmap[i];
         retro_click->bitmap[i] = temp >> 1;
         retro_click->bitmap[i] = retro_click->bitmap[i] | (unsigned char)(temp << 7);
+#endif
 
         as1115_write(retro_click, (unsigned char)(i + 1), retro_click->bitmap[i]);
     }

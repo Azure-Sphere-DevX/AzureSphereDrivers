@@ -22,6 +22,10 @@
 #define AS1115_I2C_ADDRESS 0x00
 #define SCAN_LIMIT 7
 
+#ifndef RETRO_CLICK_PRE_PRODUCTION
+#define RETRO_CLICK_PRODUCTION
+#endif
+
 typedef struct
 {
 	I2C_InterfaceId interfaceId;
