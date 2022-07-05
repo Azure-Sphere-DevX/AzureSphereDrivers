@@ -34,4 +34,4 @@ float avnet_get_pressure(void);
 float avnet_get_temperature_lps22h(void);	// get_temperature() from lsm6dso is faster
 void avnet_calibrate_angular_rate(void);
 AngularRateDegreesPerSecond avnet_get_angular_rate(void);
-AccelerationMilligForce avnet_get_acceleration(void);
+void avnet_get_acceleration(float *x, float *y, float *z);

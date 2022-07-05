@@ -20,36 +20,36 @@
  ******************************************************************************
  */
 
- /*
-  * This example was developed using the following STMicroelectronics
-  * evaluation boards:
-  *
-  * - STEVAL_MKI109V3 + STEVAL-MKI196V1
-  * - NUCLEO_F411RE + X_NUCLEO_IKS01A3
-  *
-  * and STM32CubeMX tool with STM32CubeF4 MCU Package
-  *
-  * Used interfaces:
-  *
-  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
-  *                    - Sensor side: SPI(Default) / I2C(supported)
-  *
-  * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
-  *                    - I2C(Default) / SPI(supported)
-  *
-  * If you need to run this example on a different hardware platform a
-  * modification of the functions: `platform_write`, `platform_read`,
-  * `tx_com` and 'platform_init' is required.
-  *
-  */
+/*
+ * This example was developed using the following STMicroelectronics
+ * evaluation boards:
+ *
+ * - STEVAL_MKI109V3 + STEVAL-MKI196V1
+ * - NUCLEO_F411RE + X_NUCLEO_IKS01A3
+ *
+ * and STM32CubeMX tool with STM32CubeF4 MCU Package
+ *
+ * Used interfaces:
+ *
+ * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
+ *                    - Sensor side: SPI(Default) / I2C(supported)
+ *
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
+ *
+ * If you need to run this example on a different hardware platform a
+ * modification of the functions: `platform_write`, `platform_read`,
+ * `tx_com` and 'platform_init' is required.
+ *
+ */
 
-  /* STMicroelectronics evaluation boards definition
-   *
-   * Please uncomment ONLY the evaluation boards in use.
-   * If a different hardware is used please comment all
-   * following target board and redefine yours.
-   */
-   //#define STEVAL_MKI109V3
+/* STMicroelectronics evaluation boards definition
+ *
+ * Please uncomment ONLY the evaluation boards in use.
+ * If a different hardware is used please comment all
+ * following target board and redefine yours.
+ */
+//#define STEVAL_MKI109V3
 
 /*
 Driver ported by: Dave Glover
@@ -61,14 +61,12 @@ Acknowledgment: Built from ST Micro samples
 
 */
 
-typedef union
-{
+typedef union {
 	int16_t i16bit[3];
 	uint8_t u8bit[6];
 } axis3bit16_t;
 
-typedef union
-{
+typedef union {
 	int16_t i16bit;
 	uint8_t u8bit[2];
 } axis1bit16_t;
@@ -77,22 +75,21 @@ typedef union
 
 /* Private variables ---------------------------------------------------------*/
 
-typedef union
-{
+typedef union {
 	int32_t i32bit;
 	uint8_t u8bit[4];
 } axis1bit32_t;
-
 
 static axis3bit16_t data_raw_acceleration;
 static axis3bit16_t data_raw_angular_rate;
 static axis3bit16_t raw_angular_rate_calibration;
 static AngularRateDegreesPerSecond angularRateDps;
-static AngularRateDegreesPerSecond angularRateDps;
-static AccelerationMilligForce accelerationMilligForce;
+// static AngularRateDegreesPerSecond angularRateDps;
+// static AccelerationMilligForce accelerationMilligForce;
+static float acceleration_mg[3];
 static uint8_t whoamI, rst;
 
-//static uint8_t tx_buffer[1000];
+// static uint8_t tx_buffer[1000];
 
 static int _i2c_fd = -1;
 static stmdev_ctx_t dev_ctx;
@@ -110,13 +107,12 @@ static bool initialized = false;
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void* handle, uint8_t reg, uint8_t* bufp, uint16_t len);
-static int32_t platform_read(void* handle, uint8_t reg, uint8_t* bufp, uint16_t len);
+static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp, uint16_t len);
+static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp, uint16_t len);
 static void platform_delay(uint32_t ms);
 static void platform_init(int i2c_fd);
-static int32_t lsm6dso_read_lps22hh_cx(void* ctx, uint8_t reg, uint8_t* data, uint16_t len);
-static int32_t lsm6dso_write_lps22hh_cx(void* ctx, uint8_t reg, uint8_t* data, uint16_t len);
-
+static int32_t lsm6dso_read_lps22hh_cx(void *ctx, uint8_t reg, uint8_t *data, uint16_t len);
+static int32_t lsm6dso_write_lps22hh_cx(void *ctx, uint8_t reg, uint8_t *data, uint16_t len);
 
 /*
  * @brief  Write generic device register (platform dependent)
@@ -128,13 +124,13 @@ static int32_t lsm6dso_write_lps22hh_cx(void* ctx, uint8_t reg, uint8_t* data, u
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void* handle, uint8_t reg, uint8_t* bufp, uint16_t len)
+static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp, uint16_t len)
 {
 	uint8_t cmdBuffer[len + 1];
 	cmdBuffer[0] = reg;
 	memcpy(&cmdBuffer[1], bufp, (size_t)len);
 
-	int32_t retVal = I2CMaster_Write(*(int*)handle, LSM6DSO_ADDRESS, cmdBuffer, (size_t)(len + 1));
+	int32_t retVal = I2CMaster_Write(*(int *)handle, LSM6DSO_ADDRESS, cmdBuffer, (size_t)(len + 1));
 	if (retVal != len + 1)
 	{
 		Log_Debug("ERROR: Expected return value to match count\n");
@@ -142,7 +138,6 @@ static int32_t platform_write(void* handle, uint8_t reg, uint8_t* bufp, uint16_t
 
 	return 0;
 }
-
 
 /*
  * @brief  Read generic device register (platform dependent)
@@ -154,9 +149,9 @@ static int32_t platform_write(void* handle, uint8_t reg, uint8_t* bufp, uint16_t
  * @param  len       number of consecutive register to read
  *
  */
-static int32_t platform_read(void* handle, uint8_t reg, uint8_t* bufp, uint16_t len)
+static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp, uint16_t len)
 {
-	int32_t retVal = I2CMaster_WriteThenRead(*(int*)handle, LSM6DSO_ADDRESS, &reg, 1, bufp, (size_t)len);
+	int32_t retVal = I2CMaster_WriteThenRead(*(int *)handle, LSM6DSO_ADDRESS, &reg, 1, bufp, (size_t)len);
 	if (retVal < 0)
 	{
 		Log_Debug("ERROR: Expected return value to match count\n");
@@ -164,7 +159,6 @@ static int32_t platform_read(void* handle, uint8_t reg, uint8_t* bufp, uint16_t 
 
 	return 0;
 }
-
 
 /*
  * @brief  platform specific delay (platform dependent)
@@ -174,19 +168,18 @@ static int32_t platform_read(void* handle, uint8_t reg, uint8_t* bufp, uint16_t 
  */
 static void platform_delay(uint32_t ms)
 {
-    struct timespec req;
-    struct timespec rem;
+	struct timespec req;
+	struct timespec rem;
 
-    req.tv_sec = (long int)(ms / 1000u);
-    req.tv_nsec = (long int)((ms - ((long unsigned int)req.tv_sec * 1000u)) * 1000000u);
+	req.tv_sec  = (long int)(ms / 1000u);
+	req.tv_nsec = (long int)((ms - ((long unsigned int)req.tv_sec * 1000u)) * 1000000u);
 
-    while (nanosleep(&req, &rem) != 0)
-    {
-        req.tv_sec = rem.tv_sec;
-        req.tv_nsec = rem.tv_nsec;
-    }
+	while (nanosleep(&req, &rem) != 0)
+	{
+		req.tv_sec  = rem.tv_sec;
+		req.tv_nsec = rem.tv_nsec;
+	}
 }
-
 
 /*
  * @brief  platform specific initialization (platform dependent)
@@ -196,8 +189,7 @@ static void platform_init(int i2c_fd)
 	_i2c_fd = i2c_fd;
 }
 
-
-//static void read_imu(void)
+// static void read_imu(void)
 //{
 //	uint8_t reg;
 //
@@ -239,44 +231,47 @@ static void platform_init(int i2c_fd)
 //		temperature_degC =
 //			lsm6dso_from_lsb_to_celsius(data_raw_temperature.i16bit);
 //	}
-//}
+// }
 
-
-AccelerationMilligForce avnet_get_acceleration(void)
+void avnet_get_acceleration(float *x, float *y, float *z)
 {
 	uint8_t reg;
 
 	if (!initialized)
 	{
-		accelerationMilligForce.x = accelerationMilligForce.y = accelerationMilligForce.z = NAN;
-		return accelerationMilligForce;
+		*x = NAN;
+		*y = NAN;
+		*z = NAN;
+		// accelerationMilligForce.x = accelerationMilligForce.y = accelerationMilligForce.z = NAN;
+		// return accelerationMilligForce;
 	}
-
-	/* Read output only if new xl value is available */
-	lsm6dso_xl_flag_data_ready_get(&dev_ctx, &reg);
-	if (reg)
+	else
 	{
-		/* Read acceleration field data */
-		memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
-		lsm6dso_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
+		/* Read output only if new xl value is available */
+		lsm6dso_xl_flag_data_ready_get(&dev_ctx, &reg);
+		if (reg)
+		{
+			/* Read acceleration field data */
+			memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
+			lsm6dso_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
 
-		// Not sure which conversion fucntion to use?
-		// https://github.com/STMicroelectronics/STMems_Standard_C_drivers/blob/master/lsm6dso_STdC/example/lsm6dso_sensor_hub_lps22hh.c
+			// Not sure which conversion fucntion to use?
+			// https://github.com/STMicroelectronics/STMems_Standard_C_drivers/blob/master/lsm6dso_STdC/example/lsm6dso_sensor_hub_lps22hh.c
 
-		//accelerationMilligForce.x = lsm6dso_from_fs4_to_mg(data_raw_acceleration.i16bit[0]);
-		//accelerationMilligForce.y = lsm6dso_from_fs4_to_mg(data_raw_acceleration.i16bit[1]);
-		//accelerationMilligForce.z = lsm6dso_from_fs4_to_mg(data_raw_acceleration.i16bit[2]);
+			acceleration_mg[0] = lsm6dso_from_fs4_to_mg(data_raw_acceleration.i16bit[0]);
+			acceleration_mg[1] = lsm6dso_from_fs4_to_mg(data_raw_acceleration.i16bit[1]);
+			acceleration_mg[2] = lsm6dso_from_fs4_to_mg(data_raw_acceleration.i16bit[2]);
+		}
 
-		accelerationMilligForce.x = lsm6dso_from_fs2_to_mg(data_raw_acceleration.i16bit[0]);
-		accelerationMilligForce.y = lsm6dso_from_fs2_to_mg(data_raw_acceleration.i16bit[1]);
-		accelerationMilligForce.z = lsm6dso_from_fs2_to_mg(data_raw_acceleration.i16bit[2]);
-
-		//Log_Debug("x %f, y %f, z %f\n", accelerationMilligForce.x, accelerationMilligForce.y, accelerationMilligForce.z);
+		*x = acceleration_mg[0];
+		*y = acceleration_mg[1];
+		*z = acceleration_mg[2];
 	}
 
-	return accelerationMilligForce;
-}
+	// Log_Debug("x %f, y %f, z %f\n", *x, *y, *z);
 
+	// return accelerationMilligForce;
+}
 
 AngularRateDegreesPerSecond avnet_get_angular_rate(void)
 {
@@ -295,18 +290,23 @@ AngularRateDegreesPerSecond avnet_get_angular_rate(void)
 		memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
 		lsm6dso_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
 
-		angularRateDps.x = (lsm6dso_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[0] - raw_angular_rate_calibration.i16bit[0])) / 1000.0;
-		angularRateDps.y = (lsm6dso_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[1] - raw_angular_rate_calibration.i16bit[1])) / 1000.0;
-		angularRateDps.z = (lsm6dso_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[2] - raw_angular_rate_calibration.i16bit[2])) / 1000.0;
+		angularRateDps.x = (lsm6dso_from_fs2000_to_mdps(
+							   data_raw_angular_rate.i16bit[0] - raw_angular_rate_calibration.i16bit[0])) /
+						   1000.0;
+		angularRateDps.y = (lsm6dso_from_fs2000_to_mdps(
+							   data_raw_angular_rate.i16bit[1] - raw_angular_rate_calibration.i16bit[1])) /
+						   1000.0;
+		angularRateDps.z = (lsm6dso_from_fs2000_to_mdps(
+							   data_raw_angular_rate.i16bit[2] - raw_angular_rate_calibration.i16bit[2])) /
+						   1000.0;
 
-		//Log_Debug("x %f, y %f, z %f\n", angularRateDps.x, angularRateDps.y, angularRateDps.z);
+		// Log_Debug("x %f, y %f, z %f\n", angularRateDps.x, angularRateDps.y, angularRateDps.z);
 	}
 
 	return angularRateDps;
 }
 
-
-float avnet_get_temperature_lps22h(void)	// get_temperature() from lsm6dso is faster
+float avnet_get_temperature_lps22h(void) // get_temperature() from lsm6dso is faster
 {
 	lps22hh_reg_t lps22hhReg;
 	int16_t i16bit;
@@ -321,9 +321,9 @@ float avnet_get_temperature_lps22h(void)	// get_temperature() from lsm6dso is fa
 	{
 		i16bit = 0;
 
-		lps22hh_read_reg(&pressure_ctx, LPS22HH_STATUS, (uint8_t*)&lps22hhReg, 1);
+		lps22hh_read_reg(&pressure_ctx, LPS22HH_STATUS, (uint8_t *)&lps22hhReg, 1);
 
-		//Read output only if new value is available
+		// Read output only if new value is available
 
 		if ((lps22hhReg.status.p_da == 1) && (lps22hhReg.status.t_da == 1))
 		{
@@ -334,8 +334,6 @@ float avnet_get_temperature_lps22h(void)	// get_temperature() from lsm6dso is fa
 	}
 	return NAN;
 }
-
-
 
 float avnet_get_temperature(void)
 {
@@ -359,7 +357,6 @@ float avnet_get_temperature(void)
 	return NAN;
 }
 
-
 float avnet_get_pressure(void)
 {
 	lps22hh_reg_t lps22hhReg;
@@ -375,9 +372,9 @@ float avnet_get_pressure(void)
 	{
 		ui32bit = 0;
 
-		lps22hh_read_reg(&pressure_ctx, LPS22HH_STATUS, (uint8_t*)&lps22hhReg, 1);
+		lps22hh_read_reg(&pressure_ctx, LPS22HH_STATUS, (uint8_t *)&lps22hhReg, 1);
 
-		//Read output only if new value is available
+		// Read output only if new value is available
 
 		if ((lps22hhReg.status.p_da == 1) && (lps22hhReg.status.t_da == 1))
 		{
@@ -389,7 +386,6 @@ float avnet_get_pressure(void)
 	return NAN;
 }
 
-
 void avnet_calibrate_angular_rate(void)
 {
 	if (!initialized)
@@ -397,8 +393,8 @@ void avnet_calibrate_angular_rate(void)
 		return;
 	}
 
-	// Read the raw angular rate data from the device to use as offsets.  We're making the assumption that the device
-	// is stationary.
+	// Read the raw angular rate data from the device to use as offsets.  We're making the assumption that the
+	// device is stationary.
 
 	uint8_t reg;
 
@@ -431,7 +427,8 @@ void avnet_calibrate_angular_rate(void)
 			lsm6dso_gy_flag_data_ready_get(&dev_ctx, &reg);
 		} while (!reg);
 
-		// Read the angular data rate again and verify that after applying the calibration, we have 0 angular rate in all directions
+		// Read the angular data rate again and verify that after applying the calibration, we have 0 angular
+		// rate in all directions
 		if (reg)
 		{
 			// Read angular rate field data
@@ -439,9 +436,12 @@ void avnet_calibrate_angular_rate(void)
 			lsm6dso_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
 
 			// Before we store the mdps values subtract the calibration data we captured at startup.
-			angularRateDps.x = lsm6dso_from_fs2000_to_mdps((int16_t)(data_raw_angular_rate.i16bit[0] - (int)raw_angular_rate_calibration.i16bit[0]));
-			angularRateDps.y = lsm6dso_from_fs2000_to_mdps((int16_t)(data_raw_angular_rate.i16bit[1] - raw_angular_rate_calibration.i16bit[1]));
-			angularRateDps.z = lsm6dso_from_fs2000_to_mdps((int16_t)(data_raw_angular_rate.i16bit[2] - raw_angular_rate_calibration.i16bit[2]));
+			angularRateDps.x = lsm6dso_from_fs2000_to_mdps(
+				(int16_t)(data_raw_angular_rate.i16bit[0] - (int)raw_angular_rate_calibration.i16bit[0]));
+			angularRateDps.y = lsm6dso_from_fs2000_to_mdps(
+				(int16_t)(data_raw_angular_rate.i16bit[1] - raw_angular_rate_calibration.i16bit[1]));
+			angularRateDps.z = lsm6dso_from_fs2000_to_mdps(
+				(int16_t)(data_raw_angular_rate.i16bit[2] - raw_angular_rate_calibration.i16bit[2]));
 		}
 
 		// If the angular values after applying the offset are not all 0.0s, then do it again!
@@ -449,7 +449,6 @@ void avnet_calibrate_angular_rate(void)
 
 	Log_Debug("LSM6DSO: Calibrating angular rate complete!\n");
 }
-
 
 static void detect_lps22hh(void)
 {
@@ -483,7 +482,7 @@ static void detect_lps22hh(void)
 		// Enable Block Data Update
 		lps22hh_block_data_update_set(&pressure_ctx, PROPERTY_ENABLE);
 
-		//Set Output Data Rate
+		// Set Output Data Rate
 		lps22hh_data_rate_set(&pressure_ctx, LPS22HH_10_Hz_LOW_NOISE);
 
 		// If we failed to detect the lps22hh device, then pause before trying again.
@@ -502,23 +501,25 @@ static void detect_lps22hh(void)
 	}
 }
 
-
 void avnet_imu_initialize(int i2c_fd)
 {
-	if (initialized) { return; }
+	if (initialized)
+	{
+		return;
+	}
 
 	/* Initialize mems driver interface */
 	dev_ctx.write_reg = platform_write;
-	dev_ctx.read_reg = platform_read;
-	dev_ctx.handle = &_i2c_fd;
+	dev_ctx.read_reg  = platform_read;
+	dev_ctx.handle    = &_i2c_fd;
 
 	// Initialize lps22hh mems driver interface
-	pressure_ctx.read_reg = lsm6dso_read_lps22hh_cx;
+	pressure_ctx.read_reg  = lsm6dso_read_lps22hh_cx;
 	pressure_ctx.write_reg = lsm6dso_write_lps22hh_cx;
-	pressure_ctx.handle = &_i2c_fd;
+	pressure_ctx.handle    = &_i2c_fd;
 
 	/* Init test platform */
-    platform_init(i2c_fd);
+	platform_init(i2c_fd);
 
 	/* Wait sensor boot time */
 	platform_delay(20);
@@ -530,7 +531,6 @@ void avnet_imu_initialize(int i2c_fd)
 		initialized = false;
 		return;
 	}
-
 
 	/* Restore default configuration */
 	lsm6dso_reset_set(&dev_ctx, PROPERTY_ENABLE);
@@ -546,8 +546,8 @@ void avnet_imu_initialize(int i2c_fd)
 	lsm6dso_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
 
 	/* Set Output Data Rate */
-	lsm6dso_xl_data_rate_set(&dev_ctx, LSM6DSO_XL_ODR_12Hz5);
-	lsm6dso_gy_data_rate_set(&dev_ctx, LSM6DSO_GY_ODR_12Hz5);
+	lsm6dso_xl_data_rate_set(&dev_ctx, LSM6DSO_XL_ODR_104Hz);
+	lsm6dso_gy_data_rate_set(&dev_ctx, LSM6DSO_GY_ODR_104Hz);
 
 	/* Set full scale */
 	lsm6dso_xl_full_scale_set(&dev_ctx, LSM6DSO_2g);
@@ -559,24 +559,23 @@ void avnet_imu_initialize(int i2c_fd)
 	lsm6dso_xl_hp_path_on_out_set(&dev_ctx, LSM6DSO_LP_ODR_DIV_100);
 	lsm6dso_xl_filter_lp2_set(&dev_ctx, PROPERTY_ENABLE);
 
-	//avnet_calibrate_angular_rate();
+	// avnet_calibrate_angular_rate();
 
 	detect_lps22hh();
 
 	initialized = true;
 
-	//read_imu();
+	// read_imu();
 
 	/* Read samples in polling mode (no int) */
 }
-
 
 /// <summary>
 ///     Closes a file descriptor and prints an error on failure.
 /// </summary>
 /// <param name="fd">File descriptor to close</param>
 /// <param name="fdName">File descriptor name to use in error message</param>
-static void CloseFdPrintError(int fd, const char* fdName)
+static void CloseFdPrintError(int fd, const char *fdName)
 {
 	if (initialized && fd >= 0)
 	{
@@ -589,7 +588,6 @@ static void CloseFdPrintError(int fd, const char* fdName)
 	initialized = false;
 }
 
-
 /// <summary>
 ///     Closes the I2C interface File Descriptors.
 /// </summary>
@@ -597,7 +595,6 @@ void avnet_imu_close(void)
 {
 	CloseFdPrintError(_i2c_fd, "i2c");
 }
-
 
 /*
  * @brief  Write lsm2mdl device register (used by configuration functions)
@@ -609,7 +606,7 @@ void avnet_imu_close(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t lsm6dso_write_lps22hh_cx(void* ctx, uint8_t reg, uint8_t* data, uint16_t len)
+static int32_t lsm6dso_write_lps22hh_cx(void *ctx, uint8_t reg, uint8_t *data, uint16_t len)
 {
 	axis3bit16_t data_raw_acceleration;
 	int32_t ret;
@@ -618,10 +615,9 @@ static int32_t lsm6dso_write_lps22hh_cx(void* ctx, uint8_t reg, uint8_t* data, u
 	lsm6dso_sh_cfg_write_t sh_cfg_write;
 
 	// Configure Sensor Hub to write to the LPS22HH, and send the write data
-	sh_cfg_write.slv0_add = (LPS22HH_I2C_ADD_L & 0xFEU) >> 1; // 7bit I2C address
-	sh_cfg_write.slv0_subadd = reg,
-		sh_cfg_write.slv0_data = *data,
-		ret = lsm6dso_sh_cfg_write(&dev_ctx, &sh_cfg_write);
+	sh_cfg_write.slv0_add    = (LPS22HH_I2C_ADD_L & 0xFEU) >> 1; // 7bit I2C address
+	sh_cfg_write.slv0_subadd = reg, sh_cfg_write.slv0_data = *data,
+	ret = lsm6dso_sh_cfg_write(&dev_ctx, &sh_cfg_write);
 
 	/* Disable accelerometer. */
 	lsm6dso_xl_data_rate_set(&dev_ctx, LSM6DSO_XL_ODR_OFF);
@@ -653,7 +649,6 @@ static int32_t lsm6dso_write_lps22hh_cx(void* ctx, uint8_t reg, uint8_t* data, u
 	return ret;
 }
 
-
 /*
  * @brief  Read lsm2mdl device register (used by configuration functions)
  *
@@ -664,7 +659,7 @@ static int32_t lsm6dso_write_lps22hh_cx(void* ctx, uint8_t reg, uint8_t* data, u
  * @param  len       number of consecutive register to read
  *
  */
-static int32_t lsm6dso_read_lps22hh_cx(void* ctx, uint8_t reg, uint8_t* data, uint16_t len)
+static int32_t lsm6dso_read_lps22hh_cx(void *ctx, uint8_t reg, uint8_t *data, uint16_t len)
 {
 	lsm6dso_sh_cfg_read_t sh_cfg_read;
 	uint8_t buf_raw[6];
@@ -676,12 +671,12 @@ static int32_t lsm6dso_read_lps22hh_cx(void* ctx, uint8_t reg, uint8_t* data, ui
 	lsm6dso_xl_data_rate_set(&dev_ctx, LSM6DSO_XL_ODR_OFF);
 
 	/* Configure Sensor Hub to read LPS22HH. */
-	sh_cfg_read.slv_add = (LPS22HH_I2C_ADD_L & 0xFEU) >> 1; /* 7bit I2C address */
+	sh_cfg_read.slv_add    = (LPS22HH_I2C_ADD_L & 0xFEU) >> 1; /* 7bit I2C address */
 	sh_cfg_read.slv_subadd = reg;
-	sh_cfg_read.slv_len = (uint8_t)len;
+	sh_cfg_read.slv_len    = (uint8_t)len;
 
 	// Call the command to read the data from the sensor hub.
-	// This data will be read from the device connected to the 
+	// This data will be read from the device connected to the
 	// sensor hub, and saved into a register for us to read.
 	ret = lsm6dso_sh_slv0_cfg_read(&dev_ctx, &sh_cfg_read);
 
@@ -722,7 +717,7 @@ static int32_t lsm6dso_read_lps22hh_cx(void* ctx, uint8_t reg, uint8_t* data, ui
 		Log_Debug("[%0x] ", data[i]);
 	}
 	Log_Debug("\n", len);
-#endif 
+#endif
 
 	/* Re-enable accelerometer */
 	lsm6dso_xl_data_rate_set(&dev_ctx, LSM6DSO_XL_ODR_104Hz);
