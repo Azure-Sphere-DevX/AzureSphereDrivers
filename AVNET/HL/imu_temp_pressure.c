@@ -268,19 +268,19 @@ void avnet_get_acceleration(float *x, float *y, float *z)
 		*z = acceleration_mg[2];
 	}
 
-	// Log_Debug("x %f, y %f, z %f\n", *x, *y, *z);
+	 //Log_Debug("x %f, y %f, z %f\n", *x, *y, *z);
 
 	// return accelerationMilligForce;
 }
 
-AngularRateDegreesPerSecond avnet_get_angular_rate(void)
+void avnet_get_angular_rate(float *x, float *y, float *z)
 {
 	uint8_t reg;
 
 	if (!initialized)
 	{
 		angularRateDps.x = angularRateDps.y = angularRateDps.z = NAN;
-		return angularRateDps;
+		*x = *y = *z = NAN;
 	}
 
 	lsm6dso_gy_flag_data_ready_get(&dev_ctx, &reg);
@@ -300,10 +300,12 @@ AngularRateDegreesPerSecond avnet_get_angular_rate(void)
 							   data_raw_angular_rate.i16bit[2] - raw_angular_rate_calibration.i16bit[2])) /
 						   1000.0;
 
-		// Log_Debug("x %f, y %f, z %f\n", angularRateDps.x, angularRateDps.y, angularRateDps.z);
+		Log_Debug("x %f, y %f, z %f\n", angularRateDps.x, angularRateDps.y, angularRateDps.z);
 	}
 
-	return angularRateDps;
+	*x = angularRateDps.x;
+	*y = angularRateDps.y;
+	*z = angularRateDps.z;
 }
 
 float avnet_get_temperature_lps22h(void) // get_temperature() from lsm6dso is faster
