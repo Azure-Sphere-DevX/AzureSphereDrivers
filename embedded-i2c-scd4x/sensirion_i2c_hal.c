@@ -111,6 +111,7 @@ void sensirion_i2c_hal_free(void) {
 int8_t sensirion_i2c_hal_read(uint8_t address, uint8_t* data, uint16_t count) {
     int32_t retVal = I2CMaster_Read(_i2c_fd, address, data, count);
     if (retVal != count) {
+
         Log_Debug("ERROR: Expected return value to match count\n");
     }
     return 0;

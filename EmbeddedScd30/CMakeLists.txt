@@ -35,10 +35,10 @@ add_definitions(${GCC_COVERAGE_COMPILE_FLAGS})
 target_link_libraries (${PROJECT_NAME} applibs pthread c)
 
 
-if(AVNET)
-    azsphere_target_hardware_definition(${PROJECT_NAME} TARGET_DIRECTORY "HardwareDefinitions/avnet_mt3620_sk" TARGET_DEFINITION "co2_monitor.json")
-endif(AVNET)
+# if(AVNET)
+#     azsphere_target_hardware_definition(${PROJECT_NAME} TARGET_DIRECTORY "HardwareDefinitions/avnet_mt3620_sk" TARGET_DEFINITION "co2_monitor.json")
+# endif(AVNET)
 
-if(AVNET_REV_2)
-    azsphere_target_hardware_definition(${PROJECT_NAME} TARGET_DIRECTORY "HardwareDefinitions/avnet_mt3620_sk_rev2" TARGET_DEFINITION "co2_monitor.json")
-endif(AVNET_REV_2)
+# if(AVNET_REV_2)
+#     azsphere_target_hardware_definition(${PROJECT_NAME} TARGET_DIRECTORY "HardwareDefinitions/avnet_mt3620_sk_rev2" TARGET_DEFINITION "co2_monitor.json")
+# endif(AVNET_REV_2)
